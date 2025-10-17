@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>yRush — B.Tech Stationery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d10;             
+      --panel:#12151a;          
+      --muted:#8892a6;          
+      --card:#151a21;
+      --border:#202734;
+      --brand:#5eead4;          
+      --brand-600:#2dd4bf;
+      --shadow:0 6px 20px rgba(0,0,0,.25);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji';
+      background:linear-gradient(180deg,#0a0d12 0%, #0c1118 100%);
+      color:#e5e7eb; line-height:1.45;
+    }
+    a{color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:saturate(140%) blur(8px);background:rgba(11,13,16,.65);border-bottom:1px solid var(--border)}
+    .nav{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:14px 20px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo{width:36px;height:36px;border-radius:10px;background:radial-gradient(circle at 30% 30%, var(--brand), var(--brand-600));box-shadow:var(--shadow)}
+    .brand span{letter-spacing:.5px}
+
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .chip{background:var(--panel);border:1px solid var(--border);color:#cbd5e1;padding:10px 12px;border-radius:999px;display:flex;align-items:center;gap:10px}
+    .chip input{all:unset;color:#e5e7eb;width:220px;max-width:52vw}
+    .select{appearance:none;background:var(--panel);border:1px solid var(--border);color:#cbd5e1;border-radius:999px;padding:10px 34px 10px 12px;position:relative}
+    .btn{cursor:pointer;border:none;border-radius:999px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
+    .btn-primary{background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#04221f}
+    .btn-ghost{background:var(--panel);border:1px solid var(--border);color:#cbd5e1}
+
+    main{padding:24px 20px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+    .sidebar{grid-column:span 3;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+    .products{grid-column:span 9}
+    @media (max-width: 980px){.sidebar,.products{grid-column:span 12}}
+
+    h1{font-size:26px;margin:14px 0 4px}
+    h2{font-size:18px;margin:16px 0 8px}
+    p.muted{color:var(--muted);margin:0}
+
+    .filter-group{display:grid;gap:10px;margin:8px 0 16px}
+    .check{display:flex;align-items:center;gap:10px}
+    .check input{accent-color:var(--brand-600)}
+
+    .product-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px}
+    @media (max-width: 980px){.product-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 620px){.product-grid{grid-template-columns:1fr}}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:100%}
+    .thumb{aspect-ratio: 4/3; background:linear-gradient(120deg,#0f1722,#121827);display:flex;align-items:center;justify-content:center}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb span{font-size:44px}
+    .info{padding:14px 14px 10px;display:grid;gap:8px}
+    .title{font-weight:600}
+    .price{display:flex;align-items:center;gap:10px}
+    .price .mrp{color:var(--muted);text-decoration:line-through;font-size:13px}
+    .meta{color:var(--muted);font-size:12px}
+    .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .qty{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+    .qty button{all:unset;padding:6px 10px;cursor:pointer}
+    .qty input{all:unset;width:36px;text-align:center;padding:6px 0}
+
+    .cart-drawer{position:fixed;inset:0 0 0 auto;transform:translateX(100%);transition:transform .3s ease;z-index:50;display:grid;grid-template-rows:auto 1fr auto;max-width:380px;background:var(--panel);border-left:1px solid var(--border);box-shadow:var(--shadow)}
+    .cart-drawer.open{transform:translateX(0)}
+    .cart-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+    .cart-list{overflow:auto;padding:10px 12px;display:grid;gap:10px}
+    .cart-item{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
+    .cart-item .mini{width:48px;height:48px;border-radius:10px;background:linear-gradient(120deg,#0f1722,#121827);display:flex;align-items:center;justify-content:center}
+    .cart-item .line{font-weight:600}
+    .cart-item .sub{color:var(--muted);font-size:12px}
+    .cart-foot{padding:14px 16px;border-top:1px solid var(--border);display:grid;gap:10px}
+    .totals{display:flex;align-items:center;justify-content:space-between}
+    .empty{color:var(--muted);text-align:center;padding:40px 10px}
+
+    footer{border-top:1px solid var(--border);padding:24px 20px;color:#97a2b6}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav container">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <span>yRush Stationery</span>
+      </div>
+      <div class="actions">
+        <label class="chip" title="Search products">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/></svg>
+          <input id="search" placeholder="Search practical book, pages, calculator…" />
+        </label>
+        <select id="sort" class="select" aria-label="Sort products">
+          <option value="featured">Featured</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name A→Z</option>
+        </select>
+        <button id="cartBtn" class="btn btn-primary" aria-haspopup="dialog" aria-controls="cartDrawer" aria-expanded="false">🛒 Cart <span id="cartCount" style="margin-left:6px;background:#07332e;color:#a7fff0;border-radius:999px;padding:2px 8px;font-size:12px;">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <aside class="sidebar" aria-label="Filters">
+        <h2>Subjects</h2>
+        <p class="muted">Filter by subject and item type. Brands removed.</p>
+
+        <div class="filter-group" id="categoryFilters"></div>
+
+        <div class="filter-group" id="typeFilters">
+          <strong>Item Type</strong>
+          <!-- JS will populate -> Practical Book, Lab Book, Pages, Sketch Book, General, Graph Book, Record Book, Kit, Calculator, Coats, Files/Folders -->
+        </div>
+
+        <div class="filter-group">
+          <strong>Price</strong>
+          <div class="check"><input type="radio" name="price" value="all" checked id="p-all"><label for="p-all">All</label></div>
+          <div class="check"><input type="radio" name="price" value="0-99" id="p1"><label for="p1">₹0 – ₹99</label></div>
+          <div class="check"><input type="radio" name="price" value="100-249" id="p2"><label for="p2">₹100 – ₹249</label></div>
+          <div class="check"><input type="radio" name="price" value="250-999" id="p3"><label for="p3">₹250 – ₹999</label></div>
+        </div>
+
+        <button id="clearFilters" class="btn btn-ghost" style="width:100%">Clear filters</button>
+      </aside>
+
+      <section class="products">
+        <h1>B.Tech Essentials</h1>
+        <p class="muted">Subjects → Physics, Chemistry, Mathematics, Computer Science, Electrical, Mechanical, Civil, Labs, General Supplies, Art & Design.</p>
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <aside id="cartDrawer" class="cart-drawer" role="dialog" aria-label="Shopping Cart" aria-modal="true">
+    <div class="cart-head">
+      <strong>Your Cart</strong>
+      <button id="closeCart" class="btn btn-ghost">Close</button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-foot">
+      <div class="totals"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
+      <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+      <small class="muted">Tip: This demo stores your cart in your browser (localStorage). No real payments.</small>
+    </div>
+  </aside>
+
+  <footer class="container">
+    © <span id="year"></span> yRush — B.Tech Stationery storefront (demo).
+  </footer>
+
+  <script>
+    // --- Data ---------------------------------------------------------------
+    // category = Subject; type = Item type requested (practical book, lab book, pages, sketch book, general, etc.)
+    const CATALOG = [
+      // Physics
+      {id:'PHY-PB-001', name:'Physics Practical Book (A4)', price:169, mrp:199, category:'Physics', type:'Practical Book', image:'images/phy_practical.jpg', details:'Pre-formatted index & readings'},
+      {id:'PHY-LB-001', name:'Physics Lab Book (Record)', price:199, mrp:239, category:'Physics', type:'Lab Book', image:'images/phy_lab.jpg', details:'Record + viva questions'},
+      {id:'PHY-FS-001', name:'Physics Formula Sheet', price:99, mrp:149, category:'Physics', type:'General', image:'images/phy_formula.jpg', details:'Quick revision sheet'},
+
+      // Chemistry
+      {id:'CHEM-PB-001', name:'Chemistry Practical Book (A4)', price:169, mrp:199, category:'Chemistry', type:'Practical Book', image:'images/chem_practical.jpg', details:'Index + titration tables'},
+      {id:'CHEM-LB-001', name:'Chemistry Lab Book', price:199, mrp:239, category:'Chemistry', type:'Lab Book', image:'images/chem_lab.jpg', details:'Record with observation pages'},
+      {id:'CHEM-KIT-001', name:'Beaker & Flask Kit (5 pcs)', price:599, mrp:699, category:'Chemistry', type:'Kit', image:'images/chem_kit.jpg', details:'Student glass set'},
+
+      // Mathematics
+      {id:'MATH-NB-001', name:'Engineering Mathematics Notebook', price:139, mrp:169, category:'Mathematics', type:'General', image:'images/math_notebook.jpg', details:'Ruled + formula margin'},
+      {id:'MATH-PAGES-001', name:'A4 Loose Pages (100)', price:119, mrp:149, category:'Mathematics', type:'Pages', image:'images/loose_pages.jpg', details:'80gsm ruled'},
+      {id:'MATH-CALC-001', name:'Scientific Calculator (fx-991ES)', price:899, mrp:999, category:'Mathematics', type:'Calculator', image:'images/calculator.jpg', details:'Engineering functions'},
+      {id:'MATH-GRAPH-001', name:'Graph Book (A4)', price:89, mrp:110, category:'Mathematics', type:'Graph Book', image:'images/graph_book.jpg', details:'Single line graphs'},
+
+      // Computer Science
+      {id:'CS-NB-001', name:'CS Notes Notebook A5', price:99, mrp:129, category:'Computer Science', type:'General', image:'images/cs_notebook.jpg', details:'Dot grid for diagrams'},
+      {id:'CS-FILE-001', name:'Subject File (Clip + 30 sleeves)', price:149, mrp:189, category:'Computer Science', type:'Files/Folders', image:'images/subject_file.jpg', details:'Transparent sleeves'},
+
+      // Electrical / Mechanical / Civil (Labs)
+      {id:'LAB-ED-001', name:'Engineering Drawing Kit', price:799, mrp:999, category:'Labs', type:'Kit', image:'images/drawing_kit.jpg', details:'Compass, scales, mini drafter'},
+      {id:'LAB-COAT-001', name:'Lab Coat (White Cotton)', price:499, mrp:599, category:'Labs', type:'Coats', image:'images/lab_coat.jpg', details:'Standard size options'},
+      {id:'LAB-REC-001', name:'Record Book (A4 200p)', price:229, mrp:269, category:'Labs', type:'Record Book', image:'images/record_book.jpg', details:'Numbered pages'},
+
+      // Art & Design
+      {id:'ART-SK-001', name:'Sketch Book A4', price:249, mrp:299, category:'Art & Design', type:'Sketch Book', image:'images/sketch_book.jpg', details:'120gsm textured paper'},
+
+      // General Supplies
+      {id:'GEN-PAGES-001', name:'A4 Plain Pages (Unruled 100)', price:119, mrp:149, category:'General Supplies', type:'Pages', image:'images/plain_pages.jpg', details:'80gsm bright paper'},
+      {id:'GEN-STICKY-001', name:'Sticky Notes (Pack of 5)', price:129, mrp:149, category:'General Supplies', type:'General', image:'images/sticky_notes.jpg', details:'76×76mm assorted'},
+      {id:'GEN-FOLDER-001', name:'Exam Folder With Button', price:69, mrp:89, category:'General Supplies', type:'Files/Folders', image:'images/exam_folder.jpg', details:'PP material, A4'},
+    ];
+
+    const TYPES_DISPLAY = ['Practical Book','Lab Book','Pages','Sketch Book','Graph Book','Record Book','Kit','Calculator','Coats','Files/Folders','General'];
+
+    const state = {
+      query: '',
+      selectedCategories: new Set(), // Subjects
+      selectedTypes: new Set(),      // Item Types
+      priceRange: 'all',
+      sort: 'featured',
+      cart: loadCart()
+    };
+
+    // --- Utils --------------------------------------------------------------
+    function formatINR(n){ return '₹' + n.toLocaleString('en-IN'); }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+    function saveCart(){ localStorage.setItem('yrush_cart', JSON.stringify(state.cart)); refreshCartBadge(); }
+    function loadCart(){ try{ return JSON.parse(localStorage.getItem('yrush_cart')) || {}; }catch{ return {}; } }
+    function cartCount(){ return Object.values(state.cart).reduce((a,c)=>a+c.qty,0); }
+    function cartSubtotal(){ return Object.values(state.cart).reduce((a,c)=>a+c.qty*c.price,0); }
+
+    // --- Rendering ----------------------------------------------------------
+    const els = {
+      grid: document.getElementById('productGrid'),
+      categoryFilters: document.getElementById('categoryFilters'),
+      typeFilters: document.getElementById('typeFilters'),
+      search: document.getElementById('search'),
+      sort: document.getElementById('sort'),
+      clear: document.getElementById('clearFilters'),
+      cartBtn: document.getElementById('cartBtn'),
+      cartDrawer: document.getElementById('cartDrawer'),
+      cartList: document.getElementById('cartList'),
+      closeCart: document.getElementById('closeCart'),
+      subtotal: document.getElementById('subtotal'),
+      year: document.getElementById('year'),
+    };
+
+    function buildFacet(list, targetEl, groupName){
+      const values = [...new Set(list.map(x=>x[groupName]))].sort();
+      targetEl.innerHTML = '<strong>' + (groupName==='category' ? 'Subjects' : 'Item Type') + '</strong>';
+      values.forEach(v=>{
+        const id = `${groupName}-${v}`.replace(/\s+/g,'-');
+        const wrap = document.createElement('label');
+        wrap.className = 'check';
+        wrap.innerHTML = `<input type="checkbox" value="${v}" id="${id}"><span>${v}</span>`;
+        targetEl.appendChild(wrap);
+        wrap.querySelector('input').addEventListener('change', e=>{
+          const set = groupName==='category' ? state.selectedCategories : state.selectedTypes;
+          if(e.target.checked) set.add(v); else set.delete(v);
+          renderProducts();
+        });
+      });
+    }
+
+    function buildTypeFacet(){
+      // Ensure all standard types appear even if not present in current data
+      const present = new Set(CATALOG.map(p=>p.type));
+      TYPES_DISPLAY.forEach(t=>present.add(t));
+      const items = [...present].sort();
+      items.forEach(v=>{
+        const id = `type-${v}`.replace(/\s+/g,'-');
+        const wrap = document.createElement('label');
+        wrap.className = 'check';
+        wrap.innerHTML = `<input type="checkbox" value="${v}" id="${id}"><span>${v}</span>`;
+        els.typeFilters.appendChild(wrap);
+        wrap.querySelector('input').addEventListener('change', e=>{
+          if(e.target.checked) state.selectedTypes.add(v); else state.selectedTypes.delete(v);
+          renderProducts();
+        });
+      });
+    }
+
+    function applyFilters(items){
+      let res = items.filter(p=>{
+        const catOK = state.selectedCategories.size? state.selectedCategories.has(p.category) : true;
+        const typeOK = state.selectedTypes.size? state.selectedTypes.has(p.type) : true;
+        const q = state.query.toLowerCase();
+        const searchOK = !q || (p.name.toLowerCase().includes(q) || p.details.toLowerCase().includes(q) || p.type.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+        let priceOK = true;
+        if(state.priceRange!=='all'){
+          const [lo,hi]=state.priceRange.split('-').map(Number);
+          priceOK = p.price>=lo && p.price<=hi;
+        }
+        return catOK && typeOK && searchOK && priceOK;
+      });
+      switch(state.sort){
+        case 'price-asc': res.sort((a,b)=>a.price-b.price); break;
+        case 'price-desc': res.sort((a,b)=>b.price-a.price); break;
+        case 'name-asc': res.sort((a,b)=>a.name.localeCompare(b.name)); break;
+        default: res.sort((a,b)=>a.mrp-a.price < b.mrp-b.price ? -1 : 1);
+      }
+      return res;
+    }
+
+    function renderProducts(){
+      const items = applyFilters(CATALOG);
+      els.grid.innerHTML = '';
+      if(!items.length){
+        els.grid.innerHTML = `<div class="empty" style="grid-column:1/-1">No items match your filters.</div>`;
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      items.forEach(p=>{
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="thumb" aria-hidden="true">${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span>📦</span>`}</div>
+          <div class="info">
+            <div class="title">${p.name}</div>
+            <div class="meta">${p.category} • ${p.type}</div>
+            <div class="price"><strong>${formatINR(p.price)}</strong> <span class="mrp">${formatINR(p.mrp)}</span></div>
+            <div class="row">
+              <small class="muted">${p.details}</small>
+              <div class="qty" data-id="${p.id}">
+                <button aria-label="Decrease">−</button>
+                <input inputmode="numeric" value="1" aria-label="Quantity">
+                <button aria-label="Increase">+</button>
+              </div>
+            </div>
+            <button class="btn btn-primary add" data-id="${p.id}">Add to cart</button>
+          </div>
+        `;
+        frag.appendChild(card);
+      });
+      els.grid.appendChild(frag);
+      els.grid.querySelectorAll('.qty').forEach(q=>{
+        const input = q.querySelector('input');
+        q.querySelectorAll('button')[0].addEventListener('click',()=>{ input.value = clamp((+input.value||1)-1,1,99) })
+        q.querySelectorAll('button')[1].addEventListener('click',()=>{ input.value = clamp((+input.value||1)+1,1,99) })
+      });
+      els.grid.querySelectorAll('.add').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const id = btn.dataset.id;
+          const qty = clamp(+btn.parentElement.querySelector('.qty input').value||1,1,99);
+          addToCart(id, qty); openCart();
+        })
+      })
+    }
+
+    // --- Cart ---------------------------------------------------------------
+    function addToCart(id, qty){
+      const product = CATALOG.find(p=>p.id===id);
+      if(!product) return;
+      const line = state.cart[id] || {id, name:product.name, price:product.price, emoji:'📦', qty:0};
+      line.qty = clamp(line.qty + qty, 1, 99);
+      state.cart[id] = line; saveCart(); renderCart();
+    }
+    function removeFromCart(id){ delete state.cart[id]; saveCart(); renderCart(); }
+    function updateQty(id, qty){ if(!state.cart[id]) return; state.cart[id].qty = clamp(qty,1,99); saveCart(); renderCart(); }
+
+    function renderCart(){
+      const items = Object.values(state.cart);
+      els.cartList.innerHTML = '';
+      if(!items.length){ els.cartList.innerHTML = `<div class="empty">Your cart is empty.</div>`; }
+      items.forEach(line=>{
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <div class="mini" aria-hidden="true"><span>🛍️</span></div>
+          <div>
+            <div class="line">${line.name}</div>
+            <div class="sub">${formatINR(line.price)} × 
+              <input type="number" min="1" max="99" value="${line.qty}" style="width:54px;background:transparent;border:1px solid var(--border);border-radius:8px;color:#e5e7eb;padding:2px 6px;"> = <strong>${formatINR(line.price*line.qty)}</strong>
+            </div>
+          </div>
+          <button class="btn btn-ghost" aria-label="Remove">Remove</button>
+        `;
+        const qtyInput = row.querySelector('input');
+        qtyInput.addEventListener('change', ()=> updateQty(line.id, clamp(+qtyInput.value||1,1,99)));
+        row.querySelector('button').addEventListener('click', ()=> removeFromCart(line.id));
+        els.cartList.appendChild(row);
+      });
+      els.subtotal.textContent = formatINR(cartSubtotal());
+      refreshCartBadge();
+    }
+
+    function refreshCartBadge(){ document.getElementById('cartCount').textContent = cartCount(); }
+    function openCart(){ els.cartDrawer.classList.add('open'); els.cartBtn.setAttribute('aria-expanded','true'); }
+    function closeCart(){ els.cartDrawer.classList.remove('open'); els.cartBtn.setAttribute('aria-expanded','false'); }
+
+    // --- Events -------------------------------------------------------------
+    els.search.addEventListener('input', debounce(()=>{ state.query = els.search.value.trim(); renderProducts(); }, 120));
+    els.sort.addEventListener('change', ()=>{ state.sort = els.sort.value; renderProducts(); });
+    document.querySelectorAll('input[name="price"]').forEach(r=> r.addEventListener('change', (e)=>{ state.priceRange = e.target.value; renderProducts(); }));
+    els.clear.addEventListener('click', ()=>{
+      state.query=''; els.search.value='';
+      state.selectedTypes.clear(); state.selectedCategories.clear();
+      state.priceRange='all'; document.getElementById('p-all').checked=true;
+      document.querySelectorAll('#categoryFilters input, #typeFilters input').forEach(i=> i.checked=false);
+      state.sort='featured'; els.sort.value='featured';
+      renderProducts();
+    });
+
+    els.cartBtn.addEventListener('click', openCart);
+    els.closeCart.addEventListener('click', closeCart);
+    document.getElementById('checkoutBtn').addEventListener('click', ()=>{ alert('Demo checkout — plug payments/order API.'); });
+
+    // --- Helpers ------------------------------------------------------------
+    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); } }
+
+    // --- Init ----------------------------------------------------------------
+    (function init(){
+      buildFacet(CATALOG, els.categoryFilters, 'category');
+      buildTypeFacet();
+      els.year.textContent = new Date().getFullYear();
+      renderProducts();
+      renderCart();
+    })();
+  </script>
+</body>
+</html>
