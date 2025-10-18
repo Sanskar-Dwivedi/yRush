@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>yRush — B.Tech Stationery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d10;             
+      --panel:#12151a;          
+      --muted:#8892a6;          
+      --card:#151a21;
+      --border:#202734;
+      --brand:#5eead4;          
+      --brand-600:#2dd4bf;
+      --shadow:0 6px 20px rgba(0,0,0,.25);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    body{
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji';
+      background:linear-gradient(180deg,#0a0d12 0%, #0c1118 100%);
+      color:#e5e7eb; line-height:1.45;
+    }
+    a{color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:saturate(140%) blur(8px);background:rgba(11,13,16,.65);border-bottom:1px solid var(--border)}
+    .nav{display:flex;align-items:center;gap:14px;justify-content:space-between;padding:14px 20px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo{width:36px;height:36px;border-radius:10px;background:radial-gradient(circle at 30% 30%, var(--brand), var(--brand-600));box-shadow:var(--shadow)}
+    .brand span{letter-spacing:.5px}
+
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .select{appearance:none;background:var(--panel);border:1px solid var(--border);color:#cbd5e1;border-radius:999px;padding:10px 34px 10px 12px;position:relative}
+    .btn{cursor:pointer;border:none;border-radius:999px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
+    .btn-primary{background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#04221f}
+    .btn-ghost{background:var(--panel);border:1px solid var(--border);color:#cbd5e1}
+
+    main{padding:24px 20px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+    .products{grid-column:span 12}
+
+    h1{font-size:26px;margin:14px 0 4px}
+    h2{font-size:18px;margin:16px 0 8px}
+    p.muted{color:var(--muted);margin:0}
+
+    .product-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px}
+    @media (max-width: 980px){.product-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 620px){.product-grid{grid-template-columns:1fr}}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:100%}
+    .thumb{aspect-ratio: 4/3; background:linear-gradient(120deg,#0f1722,#121827);display:flex;align-items:center;justify-content:center}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb span{font-size:44px}
+    .info{padding:14px 14px 10px;display:grid;gap:8px}
+    .title{font-weight:600}
+    .price{display:flex;align-items:center;gap:10px}
+    .price .mrp{color:var(--muted);text-decoration:line-through;font-size:13px}
+    .meta{color:var(--muted);font-size:12px}
+    .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .qty{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+    .qty button{all:unset;padding:6px 10px;cursor:pointer}
+    .qty input{all:unset;width:36px;text-align:center;padding:6px 0}
+
+    .cart-drawer{position:fixed;inset:0 0 0 auto;transform:translateX(100%);transition:transform .3s ease;z-index:50;display:grid;grid-template-rows:auto 1fr auto;max-width:380px;background:var(--panel);border-left:1px solid var(--border);box-shadow:var(--shadow)}
+    .cart-drawer.open{transform:translateX(0)}
+    .cart-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+    .cart-list{overflow:auto;padding:10px 12px;display:grid;gap:10px}
+    .cart-item{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
+    .cart-item .mini{width:48px;height:48px;border-radius:10px;background:linear-gradient(120deg,#0f1722,#121827);display:flex;align-items:center;justify-content:center}
+    .cart-item .line{font-weight:600}
+    .cart-item .sub{color:var(--muted);font-size:12px}
+    .cart-foot{padding:14px 16px;border-top:1px solid var(--border);display:grid;gap:10px}
+    .totals{display:flex;align-items:center;justify-content:space-between}
+    .empty{color:var(--muted);text-align:center;padding:40px 10px}
+
+    footer{border-top:1px solid var(--border);padding:24px 20px;color:#97a2b6}
+  </style>
+</head>
+<body>
+  <script>
+    // Check if user is logged in
+    function checkLogin() {
+      const savedUsers = localStorage.getItem('campusQuillUsers');
+      const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+      
+      if (!currentUser.email || !savedUsers) {
+        // Not logged in, redirect to login page
+        window.location.href = 'index.html';
+        return false;
+      }
+      
+      const users = JSON.parse(savedUsers);
+      if (!users[currentUser.email] || users[currentUser.email].password !== currentUser.password) {
+        // Invalid login, redirect to login page
+        window.location.href = 'index.html';
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Run check when page loads
+    if (!checkLogin()) {
+      // Redirect will happen automatically
+    }
+  </script>
+
+  <header>
+    <div class="nav container">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <span>yRush Stationery</span>
+      </div>
+      <div class="actions">
+        <select id="sort" class="select" aria-label="Sort products">
+          <option value="featured">Featured</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name-asc">Name A→Z</option>
+        </select>
+        <button id="cartBtn" class="btn btn-primary" aria-haspopup="dialog" aria-controls="cartDrawer" aria-expanded="false">🛒 Cart <span id="cartCount" style="margin-left:6px;background:#07332e;color:#a7fff0;border-radius:999px;padding:2px 8px;font-size:12px;">0</span></button>
+        <!-- Add logout button -->
+        <button id="logoutBtn" class="btn btn-ghost" style="margin-left: 10px;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <section class="products">
+        <h1>B.Tech Stationery</h1>
+        <p class="muted">All essential stationery items for engineering students</p>
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <aside id="cartDrawer" class="cart-drawer" role="dialog" aria-label="Shopping Cart" aria-modal="true">
+    <div class="cart-head">
+      <strong>Your Cart</strong>
+      <button id="closeCart" class="btn btn-ghost">Close</button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-foot">
+      <div class="totals"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
+      <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+      <small class="muted">Tip: This demo stores your cart in your browser (localStorage). No real payments.</small>
+    </div>
+  </aside>
+
+  <footer class="container">
+    © <span id="year"></span> yRush — B.Tech Stationery storefront (demo).
+  </footer>
+
+  <script>
+    // --- Data ---------------------------------------------------------------
+    const CATALOG = [
+      // Drawing & Sketching
+      {id:'DRAW-SKETCH-001', name:'Drawing Sketch-Book', price:80, category:'Drawing', type:'Sketch Book', image:'images/sketch_book.jpg', details:'A4 size, 100 pages'},
+      {id:'DRAW-SHEET-001', name:'Drawing Sheet', price:5, category:'Drawing', type:'Sheets', image:'images/drawing_sheet.jpg', details:'Single sheet, A4 size'},
+      {id:'ROLL-DRAW-SML', name:'Roll N Draw Small', price:33, category:'Drawing', type:'Drawing Tools', image:'images/roll_draw_small.jpg', details:'Portable drawing tool'},
+      {id:'ROLL-DRAW-BIG', name:'Roll N Draw Big', price:59, category:'Drawing', type:'Drawing Tools', image:'images/roll_draw_big.jpg', details:'Large drawing tool'},
+      {id:'DRAW-BOARD-PIN', name:'Drawing Board Pin', price:15, category:'Drawing', type:'Accessories', image:'images/board_pin.jpg', details:'Pack of 10 pins'},
+      
+      // Practical & Files
+      {id:'PRAC-JOUR-FILE', name:'Practical & Journal File', price:20, category:'Practical', type:'Files', image:'images/practical_file.jpg', details:'A4 size with clips'},
+      {id:'PRAC-PAPER-20', name:'Practical Paper (20 Pages)', price:10, category:'Practical', type:'Paper', image:'images/practical_paper.jpg', details:'20 pages, ruled'},
+      {id:'FILD-BOOK', name:'Fild Book', price:15, category:'General', type:'Notebook', image:'images/fild_book.jpg', details:'General purpose notebook'},
+      {id:'WORK-SHOP-BOOK', name:'Work Shop Book', price:10, category:'Workshop', type:'Notebook', image:'images/workshop_book.jpg', details:'Workshop practical notebook'},
+      
+      // Geometry & Tools
+      {id:'EXAM-COMPASS', name:'Exam Compass', price:35, category:'Geometry', type:'Tools', image:'images/compass.jpg', details:'Precision compass for exams'},
+      {id:'PROTECTOR-D', name:'Protector D', price:5, category:'Geometry', type:'Tools', image:'images/protractor.jpg', details:'180 degree protractor'},
+      {id:'FRENCH-KAVER', name:'French Kaver', price:12, category:'Geometry', type:'Tools', image:'images/french_curve.jpg', details:'French curve for drawing'},
+      {id:'SET-SQUARES', name:'Set Squares', price:45, category:'Geometry', type:'Tools', image:'images/set_squares.jpg', details:'45° & 60° set squares'},
+      
+      // Stationery
+      {id:'NOVEL-PENCIL', name:'Novel Klick Pencil', price:10, category:'Stationery', type:'Pencils', image:'images/click_pencil.jpg', details:'Mechanical pencil'},
+      {id:'SHEET-BOX', name:'Sheet Box', price:60, category:'Storage', type:'Box', image:'images/sheet_box.jpg', details:'A4 sheet storage box'},
+      
+      // Digital Media
+      {id:'CD-001', name:'CD', price:10, category:'Digital', type:'Media', image:'images/cd.jpg', details:'Blank CD for data storage'},
+      {id:'DVD-001', name:'DVD', price:14, category:'Digital', type:'Media', image:'images/dvd.jpg', details:'Blank DVD for data storage'},
+      
+      // Xerox Services
+      {id:'XEROX-1-30', name:'Xerox (1-30 pages)', price:1, category:'Xerox', type:'Service', image:'images/xerox.jpg', details:'Per page rate for 1-30 pages'},
+      {id:'XEROX-30-100', name:'Xerox (30-100 pages)', price:0.75, category:'Xerox', type:'Service', image:'images/xerox.jpg', details:'Per page rate for 30-100 pages'},
+      {id:'XEROX-100-ABOVE', name:'Xerox (100+ pages)', price:0.65, category:'Xerox', type:'Service', image:'images/xerox.jpg', details:'Per page rate for 100+ pages'}
+    ];
+
+    const state = {
+      sort: 'featured',
+      cart: loadCart()
+    };
+
+    // --- Utils --------------------------------------------------------------
+    function formatINR(n){ return '₹' + n.toLocaleString('en-IN'); }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+    function saveCart(){ localStorage.setItem('yrush_cart', JSON.stringify(state.cart)); refreshCartBadge(); }
+    function loadCart(){ try{ return JSON.parse(localStorage.getItem('yrush_cart')) || {}; }catch{ return {}; } }
+    function cartCount(){ return Object.values(state.cart).reduce((a,c)=>a+c.qty,0); }
+    function cartSubtotal(){ return Object.values(state.cart).reduce((a,c)=>a+c.qty*c.price,0); }
+
+    // --- Rendering ----------------------------------------------------------
+    const els = {
+      grid: document.getElementById('productGrid'),
+      sort: document.getElementById('sort'),
+      cartBtn: document.getElementById('cartBtn'),
+      cartDrawer: document.getElementById('cartDrawer'),
+      cartList: document.getElementById('cartList'),
+      closeCart: document.getElementById('closeCart'),
+      subtotal: document.getElementById('subtotal'),
+      year: document.getElementById('year'),
+    };
+
+    function renderProducts(){
+      let items = [...CATALOG];
+      
+      // Apply sorting
+      switch(state.sort){
+        case 'price-asc': items.sort((a,b)=>a.price-b.price); break;
+        case 'price-desc': items.sort((a,b)=>b.price-a.price); break;
+        case 'name-asc': items.sort((a,b)=>a.name.localeCompare(b.name)); break;
+        default: items.sort((a,b)=>a.name.localeCompare(b.name));
+      }
+      
+      els.grid.innerHTML = '';
+      if(!items.length){
+        els.grid.innerHTML = `<div class="empty" style="grid-column:1/-1">No items available.</div>`;
+        return;
+      }
+      
+      const frag = document.createDocumentFragment();
+      items.forEach(p=>{
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="thumb" aria-hidden="true">${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<span>📦</span>`}</div>
+          <div class="info">
+            <div class="title">${p.name}</div>
+            <div class="meta">${p.category} • ${p.type}</div>
+            <div class="price"><strong>${formatINR(p.price)}</strong></div>
+            <div class="row">
+              <small class="muted">${p.details}</small>
+              <div class="qty" data-id="${p.id}">
+                <button aria-label="Decrease">−</button>
+                <input inputmode="numeric" value="1" aria-label="Quantity">
+                <button aria-label="Increase">+</button>
+              </div>
+            </div>
+            <button class="btn btn-primary add" data-id="${p.id}">Add to cart</button>
+          </div>
+        `;
+        frag.appendChild(card);
+      });
+      els.grid.appendChild(frag);
+      
+      // Quantity controls
+      els.grid.querySelectorAll('.qty').forEach(q=>{
+        const input = q.querySelector('input');
+        q.querySelectorAll('button')[0].addEventListener('click',()=>{ input.value = clamp((+input.value||1)-1,1,99) })
+        q.querySelectorAll('button')[1].addEventListener('click',()=>{ input.value = clamp((+input.value||1)+1,1,99) })
+      });
+      
+      // Add to cart buttons
+      els.grid.querySelectorAll('.add').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          const id = btn.dataset.id;
+          const qty = clamp(+btn.parentElement.querySelector('.qty input').value||1,1,99);
+          addToCart(id, qty); 
+          openCart();
+        })
+      })
+    }
+
+    // --- Cart ---------------------------------------------------------------
+    function addToCart(id, qty){
+      const product = CATALOG.find(p=>p.id===id);
+      if(!product) return;
+      const line = state.cart[id] || {id, name:product.name, price:product.price, emoji:'📦', qty:0};
+      line.qty = clamp(line.qty + qty, 1, 99);
+      state.cart[id] = line; 
+      saveCart(); 
+      renderCart();
+    }
+    
+    function removeFromCart(id){ 
+      delete state.cart[id]; 
+      saveCart(); 
+      renderCart(); 
+    }
+    
+    function updateQty(id, qty){ 
+      if(!state.cart[id]) return; 
+      state.cart[id].qty = clamp(qty,1,99); 
+      saveCart(); 
+      renderCart(); 
+    }
+
+    function renderCart(){
+      const items = Object.values(state.cart);
+      els.cartList.innerHTML = '';
+      if(!items.length){ 
+        els.cartList.innerHTML = `<div class="empty">Your cart is empty.</div>`; 
+      }
+      
+      items.forEach(line=>{
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <div class="mini" aria-hidden="true"><span>🛍️</span></div>
+          <div>
+            <div class="line">${line.name}</div>
+            <div class="sub">${formatINR(line.price)} × 
+              <input type="number" min="1" max="99" value="${line.qty}" style="width:54px;background:transparent;border:1px solid var(--border);border-radius:8px;color:#e5e7eb;padding:2px 6px;"> = <strong>${formatINR(line.price*line.qty)}</strong>
+            </div>
+          </div>
+          <button class="btn btn-ghost" aria-label="Remove">Remove</button>
+        `;
+        const qtyInput = row.querySelector('input');
+        qtyInput.addEventListener('change', ()=> updateQty(line.id, clamp(+qtyInput.value||1,1,99)));
+        row.querySelector('button').addEventListener('click', ()=> removeFromCart(line.id));
+        els.cartList.appendChild(row);
+      });
+      
+      els.subtotal.textContent = formatINR(cartSubtotal());
+      refreshCartBadge();
+    }
+
+    function refreshCartBadge(){ 
+      document.getElementById('cartCount').textContent = cartCount(); 
+    }
+    
+    function openCart(){ 
+      els.cartDrawer.classList.add('open'); 
+      els.cartBtn.setAttribute('aria-expanded','true'); 
+    }
+    
+    function closeCart(){ 
+      els.cartDrawer.classList.remove('open'); 
+      els.cartBtn.setAttribute('aria-expanded','false'); 
+    }
+
+    // --- Events -------------------------------------------------------------
+    els.sort.addEventListener('change', ()=>{ 
+      state.sort = els.sort.value; 
+      renderProducts(); 
+    });
+
+    els.cartBtn.addEventListener('click', openCart);
+    els.closeCart.addEventListener('click', closeCart);
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = 'index.html';
+    });
+    document.getElementById('checkoutBtn').addEventListener('click', ()=>{ 
+      alert('Demo checkout — plug payments/order API.'); 
+    });
+
+    // --- Init ----------------------------------------------------------------
+    (function init(){
+      els.year.textContent = new Date().getFullYear();
+      renderProducts();
+      renderCart();
+    })();
+  </script>
+</body>
+</html>
