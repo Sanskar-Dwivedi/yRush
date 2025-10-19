@@ -453,7 +453,17 @@
     els.sort.addEventListener('change',()=>{state.sort=els.sort.value;renderProducts();});
     els.cartBtn.addEventListener('click',openCart);
     els.closeCart.addEventListener('click',closeCart);
-    document.getElementById('checkoutBtn').addEventListener('click',()=>alert('Demo checkout only.'));
+    document.getElementById('checkoutBtn').addEventListener('click', function() {
+    // Save cart data to pass to checkout page
+    localStorage.setItem('checkoutData', JSON.stringify({
+        cart: state.cart,
+        subtotal: cartSubtotal(),
+        timestamp: new Date().toISOString()
+    }));
+    
+    // Redirect to checkout page
+    window.location.href = 'checkOut.html';
+});
     (function init(){els.year.textContent=new Date().getFullYear();renderProducts();renderCart();})();
   </script>
 </body>

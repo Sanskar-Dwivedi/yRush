@@ -24,7 +24,6 @@
     header{position:sticky;top:0;z-index:5;background:rgba(11,13,16,.7);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 4px}
     .brand{display:flex;gap:10px;align-items:center;font-weight:700}
-    .logo{width:28px;height:28px;border-radius:8px;background:radial-gradient(circle at 30% 30%,var(--brand),var(--brand-600))}
     .btn{cursor:pointer;border:none;border-radius:999px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
     .btn-primary{background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#04221f}
     .btn-ghost{background:var(--panel);border:1px solid var(--border);color:#d1d7e3}
@@ -75,7 +74,10 @@
 <body>
   <header>
     <div class="container nav">
-      <div class="brand"><div class="logo"></div><span>yRush Checkout</span></div>
+      <div class="brand">
+        <img src="logo.png" alt="yRush Logo" style="height: 28px; width: auto; border-radius: 8px;">
+        <span>yRush Checkout</span>
+      </div>
       <div>
         <a class="btn btn-ghost back" href="list.html">← Continue Shopping</a>
       </div>
@@ -126,7 +128,7 @@
 
             <div class="paybar">
               <button class="btn btn-primary" id="payBtn" type="submit">Pay & Generate Token</button>
-              <span class="notice">You’ll get a 6-digit token after payment.</span>
+              <span class="notice">You'll get a 6-digit token after payment.</span>
             </div>
             <div id="payMsg" class="muted" style="margin-top:10px;"></div>
           </form>
@@ -154,7 +156,7 @@
         <h2 style="margin:14px 0 8px;">Your token number</h2>
         <div class="token" id="tokenNum">000000</div>
         <p class="muted" style="max-width:520px;margin:10px auto 0;">
-          Show this token at the counter to collect your order. We’ve saved your order in this browser (demo).
+          Show this token at the counter to collect your order. We've saved your order in this browser (demo).
         </p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
           <a class="btn btn-primary" href="list.html">Done — Back to store</a>
