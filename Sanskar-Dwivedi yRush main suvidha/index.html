@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yRush - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .success {
+            color: green;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .switch-form a {
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .demo {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <!-- Login Form -->
+        <div id="loginForm">
+            <h1>📚 yRush</h1>
+            
+            <div class="error" id="loginError"></div>
+            
+            <form id="loginFormElement">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="xxxxxx@ycce.in" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit">Login</button>
+            </form>
+            
+            <div class="switch-form">
+                Don't have an account? <a onclick="showSignup()">Sign up here</a>
+            </div>
+        </div>
+
+        <!-- Sign Up Form (Hidden initially) -->
+        <div id="signupForm" style="display: none;">
+            <h1>📚 Create Account</h1>
+            
+            <div class="error" id="signupError"></div>
+            <div class="success" id="signupSuccess"></div>
+            
+            <form id="signupFormElement">
+                <div class="input-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="signupEmail">College Email</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your college email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="signupCourse">Course</label>
+                    <input type="text" id="signupCourse" placeholder="e.g., Computer Science" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+                
+                <button type="submit">Create Account</button>
+            </form>
+            
+            <div class="switch-form">
+                Already have an account? <a onclick="showLogin()">Login here</a>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="demo">
+            <strong>Demo Admin Account:</strong><br>
+            admin@campusquill.com / admin123
+        </div>
+    </div>
+
+    <script>
+        // This will store ALL users including newly signed up ones
+        let users = {};
+
+        // Load existing users from localStorage or create default admin
+        function loadUsers() {
+            const savedUsers = localStorage.getItem('campusQuillUsers');
+            if (savedUsers) {
+                users = JSON.parse(savedUsers);
+            } else {
+                // Create default admin account if no users exist
+                users = {
+                    'admin@campusquill.com': { 
+                        password: 'admin123', 
+                        name: 'Shop Manager', 
+                        type: 'admin',
+                        course: 'Management'
+                    },
+                    'student@college.edu': { 
+                        password: 'pass123', 
+                        name: 'John Student', 
+                        type: 'student',
+                        course: 'Computer Science'
+                    }
+                };
+                saveUsers();
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem('campusQuillUsers', JSON.stringify(users));
+        }
+
+        // Show/Hide forms
+        function showSignup() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function showLogin() {
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('signupError').style.display = 'none';
+            document.getElementById('signupSuccess').style.display = 'none';
+        }
+
+        // Handle Login
+        document.getElementById('loginFormElement').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('loginError');
+            
+            errorElement.style.display = 'none';
+            
+            if (users[email] && users[email].password === password) {
+                const user = users[email];
+                // Store user data for the products page
+                sessionStorage.setItem('currentUser', JSON.stringify({
+                    email: email,
+                    name: user.name,
+                    type: user.type,
+                    course: user.course,
+                    password: user.password
+                }));
+                showDashboard(user);
+            } else {
+                errorElement.textContent = '❌ Invalid email or password';
+                errorElement.style.display = 'block';
+            }
+        });
+
+        // Handle Sign Up
+        document.getElementById('signupFormElement').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const course = document.getElementById('signupCourse').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const errorElement = document.getElementById('signupError');
+            const successElement = document.getElementById('signupSuccess');
+            
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+
+            // Validation
+            if (password !== confirmPassword) {
+                errorElement.textContent = '❌ Passwords do not match';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            if (users[email]) {
+                errorElement.textContent = '❌ Email already registered';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Create new user
+            users[email] = {
+                password: password,
+                name: name,
+                type: 'student',
+                course: course
+            };
+            
+            saveUsers();
+            
+            successElement.textContent = '✅ Account created successfully! You can now login.';
+            successElement.style.display = 'block';
+            
+            // Clear form
+            document.getElementById('signupFormElement').reset();
+            
+            // Switch to login after 2 seconds
+            setTimeout(() => {
+                showLogin();
+                document.getElementById('email').value = email;
+            }, 2000);
+        });
+
+        function showDashboard(user) {
+            const loginBox = document.querySelector('.login-box');
+            
+            if (user.type === 'student') {
+                // Redirect to products page instead of showing dashboard
+                window.location.href = 'list.html';
+            } else {
+                // For admin, show admin panel
+                loginBox.innerHTML = `
+                    <h1>🏪 Welcome, ${user.name}!</h1>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <h3>Admin Dashboard</h3>
+                        <p>Total Registered Students: ${Object.keys(users).filter(email => users[email].type === 'student').length}</p>
+                        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h4>Shop Management</h4>
+                            <div style="text-align: left;">
+                                <p>Manage inventory and view orders</p>
+                            </div>
+                        </div>
+                        <button onclick="location.reload()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Logout
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Load users when page starts
+        loadUsers();
+    </script>
+</body>
+</html>
