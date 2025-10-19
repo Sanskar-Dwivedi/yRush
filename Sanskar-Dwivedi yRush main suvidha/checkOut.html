@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>yRush — Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d10; --panel:#12151a; --muted:#9aa4b5; --card:#151a21; --border:#202734;
+      --brand:#5eead4; --brand-600:#2dd4bf; --danger:#ef4444;
+      --shadow:0 6px 20px rgba(0,0,0,.25); --radius:18px;
+    }
+    *{box-sizing:border-box} html,body{margin:0;height:100%}
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0a0d12 0%,#0c1118 100%);
+      color:#e5e7eb
+    }
+    a{color:inherit;text-decoration:none}
+    .container{max-width:980px;margin:0 auto;padding:20px}
+    header{position:sticky;top:0;z-index:5;background:rgba(11,13,16,.7);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 4px}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:700}
+    .logo{width:28px;height:28px;border-radius:8px;background:radial-gradient(circle at 30% 30%,var(--brand),var(--brand-600))}
+    .btn{cursor:pointer;border:none;border-radius:999px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
+    .btn-primary{background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#04221f}
+    .btn-ghost{background:var(--panel);border:1px solid var(--border);color:#d1d7e3}
+    .grid{display:grid;grid-template-columns:2fr 1.2fr;gap:20px}
+    @media (max-width: 860px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--border);font-size:18px}
+    .card .body{padding:16px}
+    .row{display:flex;gap:10px}
+    .field{flex:1;display:grid;gap:6px;margin-bottom:12px}
+    label{color:#cdd6e4;font-size:14px}
+    input,select{background:#0f1420;border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:#e5e7eb}
+    .muted{color:var(--muted)}
+    .summary-list{display:grid;gap:12px}
+    .line{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border-bottom:1px dashed #243044;padding:8px 0}
+    .qty{color:#b7c0d1}
+    .totals{margin-top:10px;border-top:1px solid var(--border);padding-top:12px;display:grid;gap:8px}
+    .totals .pair{display:flex;align-items:center;justify-content:space-between}
+    .paybar{display:flex;gap:10px;align-items:center;margin-top:12px}
+    .notice{font-size:13px;color:#9fb1c8}
+    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 16px}
+    .token{
+      font-size:42px;font-weight:800;letter-spacing:4px;
+      color:#011e1a; /* fallback color */
+      background:linear-gradient(180deg,var(--brand),var(--brand-600));
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .pill{display:inline-flex;gap:8px;align-items:center;background:#0f1823;border:1px solid var(--border);border-radius:999px;padding:8px 12px}
+    .back{margin-left:8px}
+
+    /* --- PRINT FIX --- */
+    @media print {
+      body { background:#fff; color:#000; }
+      header, .back, .notice { display:none !important; }
+      .card { box-shadow:none; border:1px solid #ccc; }
+      .token {
+        background:none !important;
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        -webkit-text-fill-color: initial !important;
+        color:#000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand"><div class="logo"></div><span>yRush Checkout</span></div>
+      <div>
+        <a class="btn btn-ghost back" href="list.html">← Continue Shopping</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="page">
+    <h1 style="margin:16px 0 14px;">Complete your order</h1>
+
+    <div class="grid" id="checkoutGrid" aria-live="polite">
+      <!-- Left: Payment / Details -->
+      <section class="card">
+        <h2>Customer & Payment</h2>
+        <div class="body">
+          <form id="payForm">
+            <div class="row">
+              <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" placeholder="Your name" required>
+              </div>
+              <div class="field">
+                <label for="phone">Phone</label>
+                <input id="phone" placeholder="10-digit number" pattern="[0-9]{10}" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="email">Email (college / contact)</label>
+              <input id="email" type="email" placeholder="you@college.edu" required>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="method">Payment method</label>
+                <select id="method">
+                  <option value="upi">UPI</option>
+                  <option value="card">Card</option>
+                  <option value="cash">Cash at counter</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="fulfill">Fulfillment</label>
+                <select id="fulfill">
+                  <option value="pickup">Pick-up at store</option>
+                  <option value="delivery">Campus delivery</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="paybar">
+              <button class="btn btn-primary" id="payBtn" type="submit">Pay & Generate Token</button>
+              <span class="notice">You’ll get a 6-digit token after payment.</span>
+            </div>
+            <div id="payMsg" class="muted" style="margin-top:10px;"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right: Order Summary -->
+      <aside class="card">
+        <h2>Order Summary</h2>
+        <div class="body">
+          <div id="summary" class="summary-list"></div>
+          <div class="totals">
+            <div class="pair"><span>Items</span><strong id="itemsCount">0</strong></div>
+            <div class="pair"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
+          </div>
+          <p class="muted" style="margin-top:10px;">Cart is saved locally in your browser. This is a demo checkout—no real payments.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Success screen (hidden initially) -->
+    <section id="success" class="card" style="display:none;margin-top:16px;">
+      <div class="center">
+        <div class="pill">✅ Payment successful</div>
+        <h2 style="margin:14px 0 8px;">Your token number</h2>
+        <div class="token" id="tokenNum">000000</div>
+        <p class="muted" style="max-width:520px;margin:10px auto 0;">
+          Show this token at the counter to collect your order. We’ve saved your order in this browser (demo).
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
+          <a class="btn btn-primary" href="list.html">Done — Back to store</a>
+          <button class="btn btn-ghost" onclick="window.print()">Print / Save receipt</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- Storage / Helpers ----------
+    const CART_KEY = 'yrush_cart';
+    const ORDERS_KEY = 'yrush_orders';
+
+    const fmt = n => '₹' + n.toLocaleString('en-IN');
+    const nowISO = () => new Date().toISOString();
+    const randomToken = () => String(Math.floor(100000 + Math.random() * 900000));
+
+    function loadCart() {
+      try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function cartLinesArray(cartObj) { return Object.values(cartObj || {}); }
+    function cartSubtotal(cartObj) {
+      return cartLinesArray(cartObj).reduce((a,c)=>a + (c.price * c.qty), 0);
+    }
+    function itemsCount(cartObj) {
+      return cartLinesArray(cartObj).reduce((a,c)=>a + c.qty, 0);
+    }
+    function saveOrder(order) {
+      const all = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+      all.push(order);
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(all));
+    }
+
+    // ---------- Prefill user ----------
+    (function prefillUser(){
+      try{
+        const u = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+        if (u && u.name) document.getElementById('name').value = u.name;
+        if (u && u.email) document.getElementById('email').value = u.email;
+      }catch{}
+    })();
+
+    // ---------- Render summary ----------
+    const cart = loadCart();
+    const summaryEl = document.getElementById('summary');
+    const subEl = document.getElementById('subtotal');
+    const countEl = document.getElementById('itemsCount');
+
+    function renderSummary() {
+      const lines = cartLinesArray(cart);
+      if (!lines.length) {
+        summaryEl.innerHTML = '<div class="muted">Your cart is empty. Add items first.</div>';
+        return;  // no redirect
+      }
+      summaryEl.innerHTML = '';
+      lines.forEach(l => {
+        const row = document.createElement('div');
+        row.className = 'line';
+        row.innerHTML = `
+          <div>
+            <div><strong>${l.name}</strong></div>
+            <div class="qty muted">Qty: ${l.qty}</div>
+          </div>
+          <div><strong>${fmt(l.price * l.qty)}</strong></div>
+        `;
+        summaryEl.appendChild(row);
+      });
+      subEl.textContent = fmt(cartSubtotal(cart));
+      countEl.textContent = itemsCount(cart);
+    }
+    renderSummary();
+
+    // ---------- Handle payment ----------
+    const form = document.getElementById('payForm');
+    const payBtn = document.getElementById('payBtn');
+    const payMsg = document.getElementById('payMsg');
+    const grid = document.getElementById('checkoutGrid');
+    const success = document.getElementById('success');
+    const tokenNum = document.getElementById('tokenNum');
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const phone = document.getElementById('phone').value.trim();
+      const method = document.getElementById('method').value;
+      const fulfill = document.getElementById('fulfill').value;
+
+      if (!name || !email || !phone) {
+        payMsg.textContent = 'Please fill all required fields.';
+        payMsg.style.color = 'var(--danger)';
+        return;
+      }
+
+      payBtn.disabled = true;
+      payMsg.style.color = '#9fb1c8';
+      payMsg.textContent = 'Processing payment…';
+
+      // Simulate payment delay
+      setTimeout(()=>{
+        const token = randomToken();
+
+        const order = {
+          token,
+          createdAt: nowISO(),
+          customer: { name, email, phone },
+          payment: { method, status: 'paid' },
+          fulfill,
+          items: cartLinesArray(cart),
+          subtotal: cartSubtotal(cart)
+        };
+
+        saveOrder(order);
+        localStorage.removeItem(CART_KEY);
+
+        tokenNum.textContent = token;
+        grid.style.display = 'none';
+        success.style.display = 'block';
+        payMsg.textContent = '';
+        payBtn.disabled = false;
+      }, 900);
+    });
+  </script>
+</body>
+</html>
