@@ -1,287 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>yRush — Checkout</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>yRush · Checkout</title>
+  <link rel="stylesheet" href="assets/app.css">
   <style>
-    :root{
-      --bg:#0b0d10; --panel:#12151a; --muted:#9aa4b5; --card:#151a21; --border:#202734;
-      --brand:#5eead4; --brand-600:#2dd4bf; --danger:#ef4444;
-      --shadow:0 6px 20px rgba(0,0,0,.25); --radius:18px;
-    }
-    *{box-sizing:border-box} html,body{margin:0;height:100%}
-    body{
-      font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#0a0d12 0%,#0c1118 100%);
-      color:#e5e7eb
-    }
-    a{color:inherit;text-decoration:none}
-    .container{max-width:980px;margin:0 auto;padding:20px}
-    header{position:sticky;top:0;z-index:5;background:rgba(11,13,16,.7);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 4px}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:700}
-    .btn{cursor:pointer;border:none;border-radius:999px;padding:10px 14px;display:inline-flex;gap:8px;align-items:center;font-weight:600}
-    .btn-primary{background:linear-gradient(180deg,var(--brand),var(--brand-600));color:#04221f}
-    .btn-ghost{background:var(--panel);border:1px solid var(--border);color:#d1d7e3}
-    .grid{display:grid;grid-template-columns:2fr 1.2fr;gap:20px}
-    @media (max-width: 860px){.grid{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
-    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--border);font-size:18px}
-    .card .body{padding:16px}
-    .row{display:flex;gap:10px}
-    .field{flex:1;display:grid;gap:6px;margin-bottom:12px}
-    label{color:#cdd6e4;font-size:14px}
-    input,select{background:#0f1420;border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:#e5e7eb}
-    .muted{color:var(--muted)}
-    .summary-list{display:grid;gap:12px}
-    .line{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border-bottom:1px dashed #243044;padding:8px 0}
-    .qty{color:#b7c0d1}
-    .totals{margin-top:10px;border-top:1px solid var(--border);padding-top:12px;display:grid;gap:8px}
-    .totals .pair{display:flex;align-items:center;justify-content:space-between}
-    .paybar{display:flex;gap:10px;align-items:center;margin-top:12px}
-    .notice{font-size:13px;color:#9fb1c8}
-    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 16px}
-    .token{
-      font-size:42px;font-weight:800;letter-spacing:4px;
-      color:#011e1a; /* fallback color */
-      background:linear-gradient(180deg,var(--brand),var(--brand-600));
-      -webkit-background-clip:text;
-      background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-    .pill{display:inline-flex;gap:8px;align-items:center;background:#0f1823;border:1px solid var(--border);border-radius:999px;padding:8px 12px}
-    .back{margin-left:8px}
-
-    /* --- PRINT FIX --- */
-    @media print {
-      body { background:#fff; color:#000; }
-      header, .back, .notice { display:none !important; }
-      .card { box-shadow:none; border:1px solid #ccc; }
-      .token {
-        background:none !important;
-        -webkit-background-clip: initial !important;
-        background-clip: initial !important;
-        -webkit-text-fill-color: initial !important;
-        color:#000 !important;
-      }
-    }
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:800px){ .two{grid-template-columns:1fr} }
+    .box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+    .row{display:flex;gap:10px;align-items:center}
   </style>
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <div class="brand">
-        <img src="logo.png" alt="yRush Logo" style="height: 28px; width: auto; border-radius: 8px;">
-        <span>yRush Checkout</span>
-      </div>
-      <div>
-        <a class="btn btn-ghost back" href="list.html">← Continue Shopping</a>
-      </div>
-    </div>
-  </header>
+<header>
+  <div class="container row">
+    <div class="brand">yRush · Checkout</div>
+    <div class="grow"></div>
+    <a class="btn btn-ghost" href="list.html">Back to store</a>
+  </div>
+</header>
 
-  <main class="container" id="page">
-    <h1 style="margin:16px 0 14px;">Complete your order</h1>
-
-    <div class="grid" id="checkoutGrid" aria-live="polite">
-      <!-- Left: Payment / Details -->
-      <section class="card">
-        <h2>Customer & Payment</h2>
-        <div class="body">
-          <form id="payForm">
-            <div class="row">
-              <div class="field">
-                <label for="name">Full name</label>
-                <input id="name" placeholder="Your name" required>
-              </div>
-              <div class="field">
-                <label for="phone">Phone</label>
-                <input id="phone" placeholder="10-digit number" pattern="[0-9]{10}" required>
-              </div>
-            </div>
-            <div class="field">
-              <label for="email">Email (college / contact)</label>
-              <input id="email" type="email" placeholder="you@college.edu" required>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <label for="method">Payment method</label>
-                <select id="method">
-                  <option value="upi">UPI</option>
-                  <option value="card">Card</option>
-                  <option value="cash">Cash at counter</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="fulfill">Fulfillment</label>
-                <select id="fulfill">
-                  <option value="pickup">Pick-up at store</option>
-                  <option value="delivery">Campus delivery</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="paybar">
-              <button class="btn btn-primary" id="payBtn" type="submit">Pay & Generate Token</button>
-              <span class="notice">You'll get a 6-digit token after payment.</span>
-            </div>
-            <div id="payMsg" class="muted" style="margin-top:10px;"></div>
-          </form>
-        </div>
-      </section>
-
-      <!-- Right: Order Summary -->
-      <aside class="card">
-        <h2>Order Summary</h2>
-        <div class="body">
-          <div id="summary" class="summary-list"></div>
-          <div class="totals">
-            <div class="pair"><span>Items</span><strong id="itemsCount">0</strong></div>
-            <div class="pair"><span>Subtotal</span><strong id="subtotal">₹0</strong></div>
+<main class="container">
+  <div class="two" style="margin-top:14px">
+    <section class="box">
+      <h3>Contact & Pickup</h3>
+      <form id="orderForm">
+        <div class="row">
+          <div style="flex:1">
+            <label>Name</label>
+            <input id="name" class="input" autocomplete="name" required>
           </div>
-          <p class="muted" style="margin-top:10px;">Cart is saved locally in your browser. This is a demo checkout—no real payments.</p>
+          <div style="flex:1">
+            <label>Class / Dept</label>
+            <input id="klass" class="input" placeholder="e.g., CSE‑B" required>
+          </div>
         </div>
-      </aside>
-    </div>
-
-    <!-- Success screen (hidden initially) -->
-    <section id="success" class="card" style="display:none;margin-top:16px;">
-      <div class="center">
-        <div class="pill">✅ Payment successful</div>
-        <h2 style="margin:14px 0 8px;">Your token number</h2>
-        <div class="token" id="tokenNum">000000</div>
-        <p class="muted" style="max-width:520px;margin:10px auto 0;">
-          Show this token at the counter to collect your order. We've saved your order in this browser (demo).
-        </p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;">
-          <a class="btn btn-primary" href="list.html">Done — Back to store</a>
-          <button class="btn btn-ghost" onclick="window.print()">Print / Save receipt</button>
+        <div class="row">
+          <div style="flex:1">
+            <label>Phone</label>
+            <input id="phone" class="input" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" autocomplete="tel-national" required>
+          </div>
+          <div style="flex:1">
+            <label>Email</label>
+            <input id="email" class="input" type="email" autocomplete="email" required>
+          </div>
         </div>
+        <div class="row">
+          <div style="flex:1">
+            <label>Payment</label>
+            <select id="pay" class="select">
+              <option>Pay on counter</option>
+              <option>UPI at pickup</option>
+              <option>UPI (online)</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label>Notes</label>
+            <input id="notes" class="input" placeholder="Any special request?">
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" type="submit" style="flex:1">Place order</button>
+          <button class="btn btn-ghost" id="clear" type="button">Clear cart</button>
+        </div>
+      </form>
+      <div id="orderResult" style="margin-top:12px"></div>
+      <div class="hint" id="tokenWarning" style="margin-top:6px;color:var(--muted)">
+        Do not share your order token with anyone(except shopkeeper).
       </div>
     </section>
-  </main>
 
-  <script>
-    // ---------- Storage / Helpers ----------
-    const CART_KEY = 'yrush_cart';
-    const ORDERS_KEY = 'yrush_orders';
+    <aside class="box">
+      <h3>Order summary</h3>
+      <div id="summary"></div>
+      <hr>
+      <div class="total"><span>Subtotal</span><span id="subtotal">₹0</span></div>      <hr>
+      <div class="total"><span>Total</span><span id="total">₹0</span></div>
+    </aside>
+  </div>
 
-    const fmt = n => '₹' + n.toLocaleString('en-IN');
-    const nowISO = () => new Date().toISOString();
-    const randomToken = () => String(Math.floor(100000 + Math.random() * 900000));
+  <section class="box" style="margin-top:16px">
+    <h3>Past orders</h3>
+    <div id="history" class="table-wrap">
+      <table class="table" id="ordersTable">
+        <thead><tr><th>Token</th><th>Date</th><th>Name</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
 
-    function loadCart() {
-      try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
-      catch { return {}; }
-    }
-    function cartLinesArray(cartObj) { return Object.values(cartObj || {}); }
-    function cartSubtotal(cartObj) {
-      return cartLinesArray(cartObj).reduce((a,c)=>a + (c.price * c.qty), 0);
-    }
-    function itemsCount(cartObj) {
-      return cartLinesArray(cartObj).reduce((a,c)=>a + c.qty, 0);
-    }
-    function saveOrder(order) {
-      const all = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-      all.push(order);
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(all));
-    }
+<script src="assets/catalog.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  const u = yRush.requireAuth();
 
-    // ---------- Prefill user ----------
-    (function prefillUser(){
-      try{
-        const u = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
-        if (u && u.name) document.getElementById('name').value = u.name;
-        if (u && u.email) document.getElementById('email').value = u.email;
-      }catch{}
-    })();
+  function loadSummary(){
+    const t = yRush.cartTotals();
+    const lines = t.lines;
+    if(!lines.length){ location.href='list.html'; return; }
+    document.getElementById('summary').innerHTML = lines.map(l=>{
+      return `<div class="row" style="justify-content:space-between"><div>${l.name} × ${l.qty}</div><div>${yRush.money(l.price*l.qty)}</div></div>`;
+    }).join('');
+    document.getElementById('subtotal').textContent = yRush.money(t.subtotal);
+    document.getElementById('total').textContent = yRush.money(t.total);
+  }
 
-    // ---------- Render summary ----------
-    const cart = loadCart();
-    const summaryEl = document.getElementById('summary');
-    const subEl = document.getElementById('subtotal');
-    const countEl = document.getElementById('itemsCount');
-
-    function renderSummary() {
-      const lines = cartLinesArray(cart);
-      if (!lines.length) {
-        summaryEl.innerHTML = '<div class="muted">Your cart is empty. Add items first.</div>';
-        return;  // no redirect
-      }
-      summaryEl.innerHTML = '';
-      lines.forEach(l => {
-        const row = document.createElement('div');
-        row.className = 'line';
-        row.innerHTML = `
-          <div>
-            <div><strong>${l.name}</strong></div>
-            <div class="qty muted">Qty: ${l.qty}</div>
-          </div>
-          <div><strong>${fmt(l.price * l.qty)}</strong></div>
-        `;
-        summaryEl.appendChild(row);
-      });
-      subEl.textContent = fmt(cartSubtotal(cart));
-      countEl.textContent = itemsCount(cart);
-    }
-    renderSummary();
-
-    // ---------- Handle payment ----------
-    const form = document.getElementById('payForm');
-    const payBtn = document.getElementById('payBtn');
-    const payMsg = document.getElementById('payMsg');
-    const grid = document.getElementById('checkoutGrid');
-    const success = document.getElementById('success');
-    const tokenNum = document.getElementById('tokenNum');
-
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const phone = document.getElementById('phone').value.trim();
-      const method = document.getElementById('method').value;
-      const fulfill = document.getElementById('fulfill').value;
-
-      if (!name || !email || !phone) {
-        payMsg.textContent = 'Please fill all required fields.';
-        payMsg.style.color = 'var(--danger)';
+  function renderHistory(){
+    const tbody = document.querySelector('#ordersTable tbody');
+    try{
+      const raw = yRush.getOrders();
+      const orders = Array.isArray(raw) ? raw.slice().reverse() : [];
+      if(!orders.length){
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted)">No orders yet</td></tr>`;
         return;
       }
+      tbody.innerHTML = orders.map(o=>{
+        const date = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : '—';
+        const items = Array.isArray(o.lines) ? o.lines.map(l=>`${l.name}×${l.qty}`).join(', ') : '';
+        return `<tr><td>${o.token}</td><td>${date}</td><td>${o.name || '—'}</td><td>${items}</td><td>${yRush.money(o.total||0)}</td><td>${o.status||'—'}</td></tr>`;
+      }).join('');
+    }catch(err){
+      console.error('renderHistory error', err);
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted)">Unable to load orders</td></tr>`;
+    }
+  }
 
-      payBtn.disabled = true;
-      payMsg.style.color = '#9fb1c8';
-      payMsg.textContent = 'Processing payment…';
+  document.getElementById('clear').onclick = ()=>{ yRush.clearCart(); loadSummary(); };
 
-      // Simulate payment delay
-      setTimeout(()=>{
-        const token = randomToken();
+  document.getElementById('orderForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const submitBtn = document.querySelector('#orderForm button[type="submit"]');
+    const origText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Placing…';
+    const name = document.getElementById('name').value.trim();
+    const klass = document.getElementById('klass').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const pay = document.getElementById('pay').value;
+    const notes = document.getElementById('notes').value.trim();
+    
+    if(!/^\d{10}$/.test(phone)){ yRush.toast('Enter a 10-digit phone number'); 
+      submitBtn.disabled = false;
+      submitBtn.textContent = origText;
+      return; 
+    }
+ 
+    const totals = yRush.cartTotals();
+ 
+    // Prevent placing orders with empty cart
+    if(!Array.isArray(totals.lines) || !totals.lines.length){
+      yRush.toast('Your cart is empty');
+      submitBtn.disabled = false;
+      submitBtn.textContent = origText;
+      return;
+    }
+ 
+    const token = yRush.token6();
+    // mark paid immediately if user selected online UPI
+    const paid = pay && /upi/i.test(pay) && pay.toLowerCase().includes('online');
+    const order = {
+      token,
+      user: u.email,
+      name, klass, phone, email, pay, notes,
+      lines: totals.lines,
+      subtotal: totals.subtotal,
+      total: totals.total,
+      status: paid ? 'Paid' : 'Unpaid',
+      createdAt: new Date().toISOString()
+    };
+    const orders = yRush.getOrders();
+    // guard if getOrders returned non-array
+    const list = Array.isArray(orders) ? orders : [];
+    list.push(order);
+    yRush.saveOrders(list);
+    // clear cart but avoid calling loadSummary() (it redirects when cart empty)
+    yRush.clearCart();
+    // update the UI for summary/subtotal/total so page doesn't instantly redirect
+    document.getElementById('summary').innerHTML = '';
+    document.getElementById('subtotal').textContent = yRush.money(0);
+    document.getElementById('total').textContent = yRush.money(0);
+    if(paid){
+      document.getElementById('orderResult').innerHTML = `<div class="success">Order placed and paid via UPI! Token: <strong>${token}</strong>. Keep payment screenshot; do not share token.</div>`;
+    } else {
+      document.getElementById('orderResult').innerHTML = `<div class="success">Order placed! Your token is <strong>${token}</strong>. Please pay at counter and show this token.</div>`;
+    }
+    // re-enable button and restore text, then scroll to result
+    submitBtn.disabled = false;
+    submitBtn.textContent = origText;
+    document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
+    renderHistory();
+  });
 
-        const order = {
-          token,
-          createdAt: nowISO(),
-          customer: { name, email, phone },
-          payment: { method, status: 'paid' },
-          fulfill,
-          items: cartLinesArray(cart),
-          subtotal: cartSubtotal(cart)
-        };
-
-        saveOrder(order);
-        localStorage.removeItem(CART_KEY);
-
-        tokenNum.textContent = token;
-        grid.style.display = 'none';
-        success.style.display = 'block';
-        payMsg.textContent = '';
-        payBtn.disabled = false;
-      }, 900);
-    });
-  </script>
+  loadSummary();
+  renderHistory();
+})();
+</script>
 </body>
 </html>
