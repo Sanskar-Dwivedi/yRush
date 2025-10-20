@@ -161,6 +161,15 @@ window.CATALOG = [
       type: 'Media',
       image: 'images/dvd.jpg',
       details: 'Blank DVD for data storage'
+    },    
+    {
+      id: 'Calculator',
+      name: 'Casio Calculator FX-991ES PLUS',
+      price: 1500,
+      category: 'Digital',
+      type: 'Media',
+      image: 'images/calculator.jpg',
+      details: 'Used to calculate complex mathematical problems'
     },
 
     //  Xerox Services

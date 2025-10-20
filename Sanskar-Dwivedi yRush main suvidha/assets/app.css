@@ -47,6 +47,20 @@ header{
 .badge{font-size:12px;color:var(--muted)}
 .row-split{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .qty{display:flex;gap:8px;align-items:center}
+ qty .input,
+ qty input[type="number"]{
+  width: 64px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  text-align: center;
+ }
+
+/* (optional) hide native spinners if they cause layout issues) */
+ qty input[type="number"]::-webkit-inner-spin-button,
+ qty input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance: none;
+  margin: 0;
+ }
 .qty input{width:64px;text-align:center}
 .sidebar{
   position:fixed;right:16px;bottom:16px;z-index:20;

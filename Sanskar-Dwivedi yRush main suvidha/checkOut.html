@@ -50,7 +50,7 @@
           <div style="flex:1">
             <label>Payment</label>
             <select id="pay" class="select">
-              <option>Pay on counter</option>
+
               <option>UPI at pickup</option>
               <option>UPI (online)</option>
             </select>
@@ -185,8 +185,6 @@
     document.getElementById('total').textContent = yRush.money(0);
     if(paid){
       document.getElementById('orderResult').innerHTML = `<div class="success">Order placed and paid via UPI! Token: <strong>${token}</strong>. Keep payment screenshot; do not share token.</div>`;
-    } else {
-      document.getElementById('orderResult').innerHTML = `<div class="success">Order placed! Your token is <strong>${token}</strong>. Please pay at counter and show this token.</div>`;
     }
     // re-enable button and restore text, then scroll to result
     submitBtn.disabled = false;
