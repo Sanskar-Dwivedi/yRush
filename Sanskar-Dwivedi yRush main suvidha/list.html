@@ -5,172 +5,338 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>yRush · Stationery</title>
   <link rel="stylesheet" href="assets/app.css">
+  <style>
+    /* Floating Cart button */
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 86px; /* moved up so toast doesn't overlap the FAB */
+      z-index: 9999; /* ensure FAB sits above toasts */
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, var(--brand), var(--brand2));
+      color: #042b27;
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    /* If your toast library uses a common class, push toasts above/below as needed.
+       Adjust selectors to match the actual toast element class if different. */
+    .toast, .toastify, .y-toast {
+      bottom: 16px !important;
+      right: 16px !important;
+      z-index: 9998 !important;
+    }
+
+    .qty-control{
+      display:inline-flex;
+      align-items:center;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:var(--card);
+      overflow:hidden;
+    }
+    .qty-control button{
+      width:32px;height:32px;line-height:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;font-weight:700;
+      border:0;cursor:pointer;
+      background:transparent;color:var(--text);
+    }
+    .qty-control .qty-num{
+      width:32px;text-align:center;font-weight:600;
+      user-select:none;
+    }
+    .qty-control button:hover{
+      background:var(--border);
+    }
+
+    .fab .count {
+      min-width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      background: #042b27;
+      color: #d9fffb;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 0 6px;
+    }
+
+    /* Modal / Drawer */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 40;
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .modal .backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .55)
+    }
+
+    .modal .panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: min(420px, 92vw);
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .modal h3 {
+      margin: 6px 8px 10px
+    }
+
+    .modal .close {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer
+    }
+
+    .row-end {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="container row">
-    <div class="brand">yRush · Stationery</div>
-    <div class="grow"></div>
-    <div id="userBox" class="badge"></div>
-    <button id="signOut" class="btn btn-ghost">Sign out</button>
+  <header>
+    <div class="container row">
+      <div class="brand">yRush · Stationery</div>
+      <div class="grow"></div>
+      <div id="userBox" class="badge"></div>
+      <button id="signOut" class="btn btn-ghost">Sign out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="row" style="margin:12px 0 8px">
+      <input id="search" class="input" placeholder="Search items…" aria-label="Search products">
+      <select id="filter" class="select" aria-label="Filter by category">
+        <option value="">All categories</option>
+        <option>Drawing</option>
+        <option>Practical</option>
+        <option>Geometry</option>
+        <option>Stationery</option>
+        <option>Storage</option>
+        <option>Digital</option>
+        <option>Xerox</option>
+      </select>
+      <select id="sort" class="select" aria-label="Sort products">
+        <option value="reco">Sort: Recommended</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="name_asc">Name: A–Z</option>
+      </select>
+    </div>
+
+    <div id="productGrid" class="grid product-grid" role="list" aria-live="polite"></div>
+  </main>
+
+  <!-- Floating cart button -->
+  <button id="cartFab" class="fab" aria-haspopup="dialog" aria-controls="cartModal">
+    <span class="count" id="cartCount">0</span> Cart
+  </button>
+
+  <!-- Cart modal / drawer -->
+  <div id="cartModal" class="modal" role="dialog" aria-modal="true" aria-label="Cart">
+    <div class="backdrop" data-close></div>
+    <aside class="panel" aria-label="Cart drawer">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3>Cart</h3>
+        <button class="close" data-close>Close</button>
+      </div>
+      <div id="cartList"></div>
+      <div class="total"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+      <hr>
+      <div class="total"><span>Total</span><span id="total">₹0</span></div>
+      <div class="row-end" style="margin-top:10px">
+        <a class="btn btn-primary" href="checkOut.html">Proceed</a>
+        <button id="clearCart" class="btn btn-ghost">Clear</button>
+      </div>
+    </aside>
   </div>
-</header>
 
-<main class="container">
-  <div class="row" style="margin:12px 0 8px">
-    <input id="search" class="input" placeholder="Search items…" aria-label="Search products">
-    <select id="filter" class="select" aria-label="Filter by category">
-      <option value="">All categories</option>
-      <option>Drawing</option><option>Practical</option><option>Geometry</option>
-      <option>Stationery</option><option>Storage</option><option>Digital</option>
-      <option>Xerox</option>
-    </select>
-    <select id="sort" class="select" aria-label="Sort products">
-      <option value="reco">Sort: Recommended</option>
-      <option value="price_asc">Price: Low to High</option>
-      <option value="price_desc">Price: High to Low</option>
-      <option value="name_asc">Name: A–Z</option>
-    </select>
-    <!-- Checkout button removed: use 'Proceed' in the sidebar -->
-  </div>
+  <footer class="container">© yRush campus mini-store</footer>
 
-  <div id="productGrid" class="grid product-grid" role="list" aria-live="polite"></div>
-</main>
+  <script src="assets/catalog.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    (function () {
+      const u = yRush.requireAuth();
+      document.getElementById('userBox').textContent = u.name ? (u.name + ' · ' + (u.type || '')) : u.email;
+      document.getElementById('signOut').onclick = () => { yRush.signOut(); location.href = 'login.html'; };
 
-<aside class="sidebar" aria-label="Cart">
-  <h3>Cart</h3>
-  <div id="cartList"></div>
-  <div class="total"><span>Subtotal</span><span id="subtotal">₹0</span></div>
-  <hr>
-  <div class="total"><span>Total</span><span id="total">₹0</span></div>
-  <div style="margin-top:10px;display:flex;gap:8px">
-    <a class="btn btn-primary" style="flex:1;text-align:center" href="checkOut.html">Proceed</a>
-    <button id="clearCart" class="btn btn-ghost">Clear</button>
-  </div>
-</aside>
+      const els = {
+        grid: document.getElementById('productGrid'),
+        search: document.getElementById('search'),
+        filter: document.getElementById('filter'),
+        sort: document.getElementById('sort'),
+        cartList: document.getElementById('cartList'),
+        subtotal: document.getElementById('subtotal'),
+        total: document.getElementById('total'),
+        clearCart: document.getElementById('clearCart'),
+        cartFab: document.getElementById('cartFab'),
+        cartModal: document.getElementById('cartModal'),
+        cartCount: document.getElementById('cartCount'),
+      };
 
-<footer class="container">© yRush campus mini‑store</footer>
+      function getViewItems() {
+        const q = (els.search.value || '').toLowerCase();
+        const f = els.filter.value;
+        let items = window.CATALOG.filter(p =>
+          (!f || p.category === f) &&
+          (p.name.toLowerCase().includes(q) || (p.details || '').toLowerCase().includes(q))
+        );
+        const s = els.sort.value;
+        if (s === 'price_asc') items.sort((a, b) => a.price - b.price);
+        else if (s === 'price_desc') items.sort((a, b) => b.price - a.price);
+        else if (s === 'name_asc') items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        return items;
+      }
 
-<script src="assets/catalog.js"></script>
-<script src="assets/app.js"></script>
-<script>
-(function(){
-  const u = yRush.requireAuth();
-  document.getElementById('userBox').textContent = u.name ? (u.name + ' · ' + (u.type||'')) : u.email;
-  document.getElementById('signOut').onclick = ()=>{ yRush.signOut(); location.href='login.html'; };
-
-  const els = {
-    grid: document.getElementById('productGrid'),
-    search: document.getElementById('search'),
-    filter: document.getElementById('filter'),
-    sort: document.getElementById('sort'),
-    cartList: document.getElementById('cartList'),
-    subtotal: document.getElementById('subtotal'),
-    total: document.getElementById('total'),
-    clearCart: document.getElementById('clearCart'),
-  };
-
-  function getViewItems(){
-    const q = (els.search.value||'').toLowerCase();
-    const f = els.filter.value;
-    let items = window.CATALOG.filter(p =>
-      (!f || p.category===f) &&
-      (p.name.toLowerCase().includes(q) || (p.details||'').toLowerCase().includes(q))
-    );
-    const s = els.sort.value;
-    if(s==='price_asc') items.sort((a,b)=>a.price-b.price);
-    else if(s==='price_desc') items.sort((a,b)=>b.price-a.price);
-    else if(s==='name_asc') items.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-    return items;
-  }
-
-  function productCard(p){
-    return `
+      function productCard(p) {
+        return `
       <article class="card" role="listitem">
         <div class="thumb">
-          <img loading="lazy" width="640" height="480" src="${p.image||''}" alt="${p.name}">
+          <img loading="lazy" width="640" height="480" src="${p.image || ''}" alt="${p.name}">
         </div>
         <div class="meta">
           <div class="row-split">
             <div>${p.name}</div>
             <div class="price">${yRush.money(p.price)}</div>
           </div>
-          <div class="badge">${p.category||''}</div>
+          <div class="badge">${p.category || ''}</div>
           <div class="qty">
-            <label for="qty-${p.id}" class="badge" style="min-width:1px">Qty</label>
-            <input id="qty-${p.id}" class="input" type="number" min="1" value="1" aria-label="Quantity for ${p.name}">
-            <button class="btn btn-primary add" data-id="${p.id}">Add to cart</button>
-          </div>
+  <label class="badge" style="min-width:1px">Qty</label>
+  <div class="qty-control" data-id="${p.id}">
+    <button class="btn btn-ghost minus">−</button>
+    <span class="qty-num" id="qty-${p.id}">1</span>
+    <button class="btn btn-ghost plus">+</button>
+  </div>
+  <button class="btn btn-primary add" data-id="${p.id}">Add to cart</button>
+</div>
         </div>
       </article>`;
-  }
+      }
 
-  function renderProducts(){
-    els.grid.innerHTML = getViewItems().map(productCard).join('');
-  }
+      function renderProducts() {
+        els.grid.innerHTML = getViewItems().map(productCard).join('');
+      }
 
-  function renderCart(){
-    const c = yRush.getCart();
-    const lines = yRush.cartLinesArray(c);
-    if(!lines.length){
-      els.cartList.innerHTML = '<div class="empty">Your cart is empty. <a href="#top">Browse items</a></div>';
-    }else{
-      els.cartList.innerHTML = lines.map(l=>{
-        const p = window.CATALOG.find(x=>x.id===l.id) || {};
-        return `<div class="cart-row" data-id="${l.id}">
-          <div class="mini">${p.image?`<img src="${p.image}" alt="${l.name}" width="48" height="48">`:'🛍️'}</div>
+      function sumQty(lines) { return lines.reduce((s, l) => s + Number(l.qty || 0), 0); }
+
+      function renderCart() {
+        const c = yRush.getCart();
+        const lines = yRush.cartLinesArray(c);
+        // Update button badge with total qty
+        els.cartCount.textContent = sumQty(lines);
+
+        if (!lines.length) {
+          els.cartList.innerHTML = '<div class="empty">Your cart is empty. <a href="#top">Browse items</a></div>';
+        } else {
+          els.cartList.innerHTML = lines.map(l => {
+            const p = window.CATALOG.find(x => x.id === l.id) || {};
+            // Show quantity as a static value (no inline editing in cart)
+            return `<div class="cart-row" data-id="${l.id}">
+          <div class="mini">${p.image ? `<img src="${p.image}" alt="${l.name}" width="48" height="48">` : '🛍️'}</div>
           <div>
             <div>${l.name}</div>
             <div class="badge">${yRush.money(l.price)}</div>
           </div>
           <div class="qty">
-            <input class="input qty-input" type="number" min="0" value="${l.qty}" aria-label="Quantity for ${l.name}">
+            <div class="badge" aria-label="Quantity for ${l.name}">Qty: ${l.qty}</div>
             <button class="btn btn-ghost rm">✕</button>
           </div>
         </div>`;
-      }).join('');
-    }
-    const t = yRush.cartTotals();
-    els.subtotal.textContent = yRush.money(t.subtotal);
-    els.total.textContent = yRush.money(t.total);
+          }).join('');
+        }
+        const t = yRush.cartTotals();
+        els.subtotal.textContent = yRush.money(t.subtotal);
+        els.total.textContent = yRush.money(t.total);
+      }
+
+      // Open / close modal
+      function openCart() {
+        els.cartModal.classList.add('show');
+        // hide FAB while cart drawer is open
+        els.cartFab.style.display = 'none';
+      }
+      function closeCart() {
+        els.cartModal.classList.remove('show');
+        // restore FAB when drawer closes
+        els.cartFab.style.display = '';
+      }
+      els.cartFab.addEventListener('click', openCart);
+      els.cartModal.addEventListener('click', (e) => { if (e.target.hasAttribute('data-close')) closeCart(); });
+      window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
+
+      // Events
+      els.grid.addEventListener('click', (e)=>{
+  const plus = e.target.closest('.plus');
+  const minus = e.target.closest('.minus');
+  const addBtn = e.target.closest('.add');
+
+  if(plus || minus){
+    const box = e.target.closest('.qty-control');
+    const id = box.dataset.id;
+    const span = box.querySelector('.qty-num');
+    let val = parseInt(span.textContent) || 1;
+    if(plus) val++;
+    if(minus && val > 1) val--;
+    span.textContent = val;
+    return;
   }
 
-  // Events
-  els.grid.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.add');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    const qtyEl = document.getElementById('qty-'+id);
-    const qty = Math.max(1, parseInt(qtyEl.value||'1',10));
+  if(addBtn){
+    const id = addBtn.dataset.id;
+    const span = document.getElementById('qty-'+id);
+    const qty = Math.max(1, parseInt(span.textContent||'1',10));
     yRush.addToCart(id, qty);
     yRush.toast('Added to cart');
     renderCart();
-  });
+  }
+});
 
-  els.cartList.addEventListener('input', (e)=>{
-    const row = e.target.closest('.cart-row'); if(!row) return;
-    const id = row.dataset.id;
-    const qty = Math.max(0, parseInt(e.target.value||'0',10));
-    yRush.setQty(id, qty);
-    renderCart();
-  });
-  els.cartList.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.rm'); if(!btn) return;
-    const row = e.target.closest('.cart-row'); const id = row.dataset.id;
-    yRush.setQty(id, 0); renderCart();
-  });
 
-  ['input','change'].forEach(ev=>{
-    els.search.addEventListener(ev, renderProducts);
-    els.filter.addEventListener(ev, renderProducts);
-    els.sort.addEventListener(ev, renderProducts);
-  });
-  els.clearCart.onclick = ()=>{ yRush.clearCart(); renderCart(); };
+      // Removed the input handler so quantities inside the cart modal cannot be modified directly.
+      els.cartList.addEventListener('click', (e) => {
+        const btn = e.target.closest('.rm'); if (!btn) return;
+        const row = e.target.closest('.cart-row'); const id = row.dataset.id;
+        yRush.setQty(id, 0); renderCart();
+      });
 
-  // Init
-  renderProducts();
-  renderCart();
-})();
-</script>
+      ['input', 'change'].forEach(ev => {
+        els.search.addEventListener(ev, renderProducts);
+        els.filter.addEventListener(ev, renderProducts);
+        els.sort.addEventListener(ev, renderProducts);
+      });
+      els.clearCart.onclick = () => { yRush.clearCart(); renderCart(); };
+
+      // Init
+      renderProducts();
+      renderCart();
+    })();
+  </script>
 </body>
 </html>

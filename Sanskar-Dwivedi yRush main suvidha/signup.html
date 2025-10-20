@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>yRush · Login</title>
+  <title>yRush · Sign Up</title>
   <link rel="stylesheet" href="assets/app.css">
   <style>
     .center{max-width:420px;margin:10vh auto;background:var(--panel);padding:20px;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
@@ -24,22 +24,30 @@
   <div class="center">
     <div class="title">
       <img src="assets/logo.png" alt="yRush logo" class="logo">
-      yRush
+      Sign Up
     </div>
-    <form id="loginForm">
+    <form id="signupForm">
+      <div>
+        <label>Name</label>
+        <input id="name" class="input" required>
+      </div>
       <div>
         <label>Email</label>
-        <input id="email" class="input" type="email" autocomplete="email" required>
+        <input id="email" class="input" type="email" required>
       </div>
       <div>
         <label>Password</label>
-        <input id="password" class="input" type="password" autocomplete="current-password" required>
+        <input id="password" class="input" type="password" required>
       </div>
-      <button class="btn btn-primary" type="submit">Sign in</button>
+      <div>
+        <label>Course</label>
+        <input id="course" class="input" placeholder="e.g., CSE">
+      </div>
+      <button class="btn btn-primary" type="submit">Create Account</button>
     </form>
     <hr>
     <div class="hint">
-      New here? <a href="signup.html">Create an account</a>
+      Already have an account? <a href="login.html">Sign in</a>
     </div>
   </div>
 </main>
@@ -47,17 +55,20 @@
 <script src="assets/app.js"></script>
 <script>
 (async ()=>{
-  const form = document.getElementById('loginForm');
+  const form = document.getElementById('signupForm');
   form.addEventListener('submit', async (e)=>{
     e.preventDefault();
+    const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim().toLowerCase();
-    const pwd = document.getElementById('password').value;
+    const pass = document.getElementById('password').value;
+    const course = document.getElementById('course').value.trim();
     const users = JSON.parse(localStorage.getItem(yRush.STORE.USERS_KEY) || '[]');
-    const hash = await yRush.sha256(pwd);
-    const user = users.find(u => u.email.toLowerCase()===email && u.passHash===hash);
-    if(!user){ yRush.toast('Invalid email or password'); return; }
-    yRush.setCurrentUser(user);
-    location.href = 'list.html';
+    if(users.some(u=>u.email===email)){ yRush.toast('User already exists'); return; }
+    const passHash = await yRush.sha256(pass);
+    users.push({email, name, type:'student', course, passHash});
+    localStorage.setItem(yRush.STORE.USERS_KEY, JSON.stringify(users));
+    yRush.toast('Account created successfully');
+    setTimeout(()=>{ location.href='login.html'; }, 1200);
   });
 })();
 </script>
