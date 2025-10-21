@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>yRush · Payment</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <style>
+    body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--panel);color:var(--text)}
+    .card{background:var(--card);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center;width:320px}
+    .btn{margin-top:16px;width:100%}
+    img{width:180px;height:180px;margin:12px auto;border-radius:8px;display:block}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>UPI Payment</h2>
+    <p>Scan the QR below or click “Simulate Payment Success”.</p>
+    <!-- Replace with your actual QR if you have one -->
+    <img src="assets/upi_qr.png" alt="UPI QR">
+
+    <button class="btn btn-primary" id="successBtn">✅ Simulate Payment Success</button>
+    <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token  = params.get('token');
+    const back   = params.get('return') || 'checkout.html';
+
+    // disable success if someone opened this page directly
+    const successBtn = document.getElementById('successBtn');
+    if(!token){ successBtn.disabled = true; successBtn.textContent = 'No token found'; }
+
+    successBtn.onclick = ()=>{
+      // Mark this token paid and return to the exact page we came from
+      localStorage.setItem('paymentSuccess', token);
+      window.location.replace(back);
+    };
+
+    document.getElementById('cancelBtn').onclick = ()=>{
+      // Return without marking success
+      window.location.replace(back);
+    };
+  </script>
+</body>
+</html>

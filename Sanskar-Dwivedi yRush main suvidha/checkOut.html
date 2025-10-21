@@ -9,8 +9,10 @@
     .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:800px){ .two{grid-template-columns:1fr} }
     .box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
-    .row{display:flex;gap:10px;align-items:center}
-  </style>
+    .row{display:flex;gap:10px;align-items:center}  
+    .mt-16{margin-top:16px}   
+    #whatsappBtn{display:block;width:100%} 
+    </style>
 </head>
 <body>
 <header>
@@ -66,10 +68,10 @@
 </div>
 
 <!-- Add WhatsApp button after order is placed -->
-<div id="whatsappSection" style="display: none; margin-top: 10px;">
-    <a class="btn btn-primary" id="whatsappBtn" target="_blank" style="background: #25D366; color: white; width: 100%; text-align: center;">
-        📱 Notify Seller via WhatsApp
-    </a>
+<div id="whatsappSection" class="mt-16" style="display:none;">
+  <a class="btn btn-primary" id="whatsappBtn" target="_blank" style="background:#25D366;color:#fff;">
+    📱 Notify Seller via WhatsApp
+  </a>
 </div>
       </form>
       <div id="orderResult" style="margin-top:12px"></div>
@@ -168,7 +170,19 @@
  
     const token = yRush.token6();
     // mark paid immediately if user selected online UPI
-    const paid = pay && /upi/i.test(pay) && pay.toLowerCase().includes('online');
+let paid = false;
+if (pay && /upi/i.test(pay) && pay.toLowerCase().includes('online')) {
+  // Redirect to payment page before finalizing order
+  const tokenTemp = yRush.token6();
+  const paymentUrl = `payment.html?token=${tokenTemp}&name=${encodeURIComponent(name)}`;
+  localStorage.setItem('pendingOrder', JSON.stringify({
+    token: tokenTemp, user: u.email, name, klass, phone, email, pay, notes,
+    lines: totals.lines, subtotal: totals.subtotal, total: totals.total,
+    status: 'Pending Payment', createdAt: new Date().toISOString()
+  }));
+  window.location.href = paymentUrl;
+  return; // stop execution here, wait for redirect
+}
     const order = {
       token,
       user: u.email,
@@ -216,6 +230,25 @@ submitBtn.textContent = origText;
 document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
 renderHistory();
   });
+  // If returned from payment.html and payment was successful
+const paidToken = localStorage.getItem('paymentSuccess');
+if(paidToken){
+  const pending = JSON.parse(localStorage.getItem('pendingOrder') || '{}');
+  if(pending && pending.token === paidToken){
+    pending.status = 'Paid';
+    const orders = yRush.getOrders();
+    const list = Array.isArray(orders) ? orders : [];
+    list.push(pending);
+    yRush.saveOrders(list);
+    localStorage.removeItem('pendingOrder');
+    localStorage.removeItem('paymentSuccess');
+    yRush.clearCart();
+    document.getElementById('orderResult').innerHTML =
+      `<div class="success">✅ Payment successful! Order placed.<br>Token: <strong>${paidToken}</strong></div>`;
+    renderHistory();
+  }
+}
+
 
   loadSummary();
   renderHistory();
