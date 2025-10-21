@@ -61,9 +61,16 @@
           </div>
         </div>
         <div class="row" style="margin-top:10px">
-          <button class="btn btn-primary" type="submit" style="flex:1">Place order</button>
-          <button class="btn btn-ghost" id="clear" type="button">Clear cart</button>
-        </div>
+    <button class="btn btn-primary" type="submit" style="flex:1">Place order</button>
+    <button class="btn btn-ghost" id="clear" type="button">Clear cart</button>
+</div>
+
+<!-- Add WhatsApp button after order is placed -->
+<div id="whatsappSection" style="display: none; margin-top: 10px;">
+    <a class="btn btn-primary" id="whatsappBtn" target="_blank" style="background: #25D366; color: white; width: 100%; text-align: center;">
+        📱 Notify Seller via WhatsApp
+    </a>
+</div>
       </form>
       <div id="orderResult" style="margin-top:12px"></div>
       <div class="hint" id="tokenWarning" style="margin-top:6px;color:var(--muted)">
@@ -184,13 +191,30 @@
     document.getElementById('subtotal').textContent = yRush.money(0);
     document.getElementById('total').textContent = yRush.money(0);
     if(paid){
-      document.getElementById('orderResult').innerHTML = `<div class="success">Order placed and paid via UPI! Token: <strong>${token}</strong>. Keep payment screenshot; do not share token.</div>`;
-    }
-    // re-enable button and restore text, then scroll to result
-    submitBtn.disabled = false;
-    submitBtn.textContent = origText;
-    document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
-    renderHistory();
+    document.getElementById('orderResult').innerHTML = `<div class="success">Order placed and paid via UPI! Token: <strong>${token}</strong>. Keep payment screenshot; do not share token.</div>`;
+} else {
+    document.getElementById('orderResult').innerHTML = `<div class="success">Order placed! Token: <strong>${token}</strong>. Show this token at pickup.</div>`;
+}
+
+// ✅ ADD WHATSAPP CODE HERE
+const whatsappSection = document.getElementById('whatsappSection');
+const whatsappBtn = document.getElementById('whatsappBtn');
+
+// Create WhatsApp message
+const itemsList = totals.lines.map(item => `${item.name} (Qty: ${item.qty})`).join('%0A- ');
+const message = `📦 New Order Alert!%0A%0A🆔 Token: ${token}%0A👤 Customer: ${name}%0A📞 Phone: ${phone}%0A🎓 Class: ${klass}%0A💰 Total: ${yRush.money(totals.total)}%0A💳 Payment: ${pay}%0A%0A📋 Items:%0A- ${itemsList}%0A%0A📝 Notes: ${notes || 'None'}`;
+
+// Update WhatsApp button (REPLACE XXXXXXXXXX WITH SELLER'S PHONE NUMBER)
+whatsappBtn.href = `https://wa.me/917820873853?text=${message}`;
+
+// Show WhatsApp button
+whatsappSection.style.display = 'block';
+
+// THEN continue with existing code
+submitBtn.disabled = false;
+submitBtn.textContent = origText;
+document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
+renderHistory();
   });
 
   loadSummary();
