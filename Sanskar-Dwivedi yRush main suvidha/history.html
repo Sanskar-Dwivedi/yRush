@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>yRush · Order History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{--bg:#0b0d10;--panel:#12151a;--text:#e5e7eb;--muted:#9aa4b5;--border:#202734;--brand:#60e7d7}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:900px;margin:32px auto;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:16px}
+    h1{margin:0 0 12px}
+    .muted{color:var(--muted)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+    th{color:var(--muted);font-weight:600}
+    .tag{display:inline-block;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted)}
+    .topbar{display:flex;gap:10px;margin-bottom:12px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer;text-decoration:none;color:var(--text)}
+    .btn.primary{background:var(--brand);color:#062a2a;border-color:#1f3b3b;font-weight:700}
+    .empty{padding:40px;text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="btn" href="checkOut.html">← Back to Checkout</a>
+    </div>
+    <h1>Your Orders</h1>
+    <p class="muted">Orders placed on this browser/device.</p>
+
+    <div id="empty" class="empty" style="display:none">No orders yet.</div>
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Date & Time</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const rowsEl = document.getElementById('rows');
+    const emptyEl = document.getElementById('empty');
+    function load(){ try{return JSON.parse(localStorage.getItem('yRush_orders'))||[];}catch(e){return [];} }
+    function fmt(dt){ try{return new Date(dt).toLocaleString('en-IN');}catch(e){return dt||'-';} }
+
+    function render(){
+      const orders = load().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+      if(!orders.length){ emptyEl.style.display='block'; rowsEl.innerHTML=''; return; }
+      emptyEl.style.display='none';
+      rowsEl.innerHTML = orders.map(o=>{
+        const items = (o.lines||[]).map(i=>`${i.name} × ${i.qty}`).join(', ') || '-';
+        return `<tr>
+            <td><b>${o.token}</b></td>
+            <td>${fmt(o.createdAt)}</td>
+            <td>₹${(o.total||0).toFixed ? (o.total||0).toFixed(2) : o.total}</td>
+            <td><span class="tag">${o.pay||'—'}</span></td>
+            <td><span class="tag">${o.status||'Pending'}</span></td>
+            <td>${items}</td>
+        </tr>`;
+      }).join('');
+    }
+    render();
+  </script>
+</body>
+</html>

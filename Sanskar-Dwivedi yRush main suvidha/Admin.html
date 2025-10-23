@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>yRush · Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b0d10;--panel:#12151a;--text:#e5e7eb;--muted:#9aa4b5;
+      --border:#202734;--accent:#60e7d7;--good:#10B981;--warn:#F59E0B;--bad:#ef4444
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:16px}
+    h1{margin:0 0 8px}
+    h2{margin:16px 0 8px}
+    .muted{color:var(--muted)}
+    .topbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+    .btn{
+      display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--border);
+      cursor:pointer;text-decoration:none;color:var(--text);background:transparent
+    }
+    .btn.primary{background:var(--accent);color:#0b0d10;border-color:#1f3b3b;font-weight:700}
+    .btn.good{background:var(--good);color:#052b23;border-color:#065f46;font-weight:700}
+    .btn.warn{background:var(--warn);color:#241a05;border-color:#7c5706;font-weight:700}
+    .btn.bad{background:var(--bad);color:#2a0909;border-color:#7f1d1d;font-weight:700}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .panel{border:1px solid var(--border);border-radius:12px;padding:12px;background:#0e1319}
+    input,select{background:#0e1319;border:1px solid var(--border);color:var(--text);padding:8px;border-radius:10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    th{color:var(--muted)}
+    .tag{display:inline-block;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .hr{height:1px;background:var(--border);margin:16px 0}
+    .pill{display:inline-block;padding:4px 8px;font-size:12px;border-radius:999px;border:1px solid var(--border);background:#0b1118;color:var(--muted)}
+    code.k{background:#0b1118;border:1px solid var(--border);padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="btn" href="list.html">🏠 Home</a>
+      <a class="btn" href="checkOut.html">🛒 Checkout</a>
+      <a class="btn" href="history.html">🕘 History</a>
+      <a class="btn" href="xerox.html">🖨️ Xerox Upload</a>
+      <button id="btnExport" class="btn">⬇️ Export CSV</button>
+      <button id="btnClearAllOrders" class="btn bad">🗑️ Clear All Orders</button>
+    </div>
+
+    <h1>Admin</h1>
+    <p class="muted">Manage orders and print jobs. Live updates from checkout and xerox pages.</p>
+
+    <!-- ORDERS SECTION -->
+    <section id="orders">
+      <h2>🧾 Orders</h2>
+
+      <div class="panel">
+        <div class="row" style="margin-bottom:8px">
+          <div><b>Filters:</b></div>
+          <select id="fStatus">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Paid</option>
+            <option>Ready</option>
+            <option>Delivered</option>
+            <option>Cancelled</option>
+          </select>
+          <input id="fSearch" placeholder="Search token/name/phone/email…" />
+          <button id="fReset" class="btn">Reset</button>
+        </div>
+
+        <div style="overflow:auto;border:1px solid var(--border);border-radius:12px">
+          <table id="tblOrders">
+            <thead>
+              <tr style="background:#0e1319">
+                <th>Token / Time</th>
+                <th>Customer</th>
+                <th>Payment</th>
+                <th>Total</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="orderRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="hr"></div>
+
+    <!-- PRINT INBOX SECTION (merged) -->
+    <section id="printInboxSection">
+      <h2>🖨️ Print Inbox</h2>
+      <p class="muted">New jobs sent from <code class="k">xerox.html</code> appear here automatically. Click a file to download/print, then mark as <b>Printed</b>.</p>
+
+      <div class="row" style="margin:8px 0 12px">
+        <button id="pi_refresh" class="btn">🔄 Refresh</button>
+        <button id="pi_clearAll" class="btn">🗑️ Clear All</button>
+        <a href="xerox.html" class="btn">⬆️ Open Upload (Xerox)</a>
+      </div>
+
+      <div style="overflow:auto;border:1px solid var(--border);border-radius:12px">
+        <table id="pi_table">
+          <thead>
+            <tr style="background:#0e1319">
+              <th>ID / Time</th>
+              <th>Customer</th>
+              <th>Options</th>
+              <th>Files</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="pi_rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ====== Shared helpers ====== */
+    const $ = sel => document.querySelector(sel);
+    const byId = id => document.getElementById(id);
+    const load = k => { try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return [];} };
+    const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+    const fmt = dt => { try{ return new Date(dt).toLocaleString('en-IN'); } catch{ return dt; } };
+    const money = n => '₹' + (Number(n)||0).toFixed(2);
+
+    /* ====== ORDERS ====== */
+    const ORDERS_KEY = 'yRush_orders';
+    const orderRows = byId('orderRows');
+
+    function getOrders(){ return load(ORDERS_KEY); }
+    function setOrders(list){ save(ORDERS_KEY, list); }
+
+    function renderOrders(){
+      const q = (byId('fSearch').value||'').toLowerCase();
+      const st = byId('fStatus').value || '';
+
+      let list = getOrders().sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+
+      if(st) list = list.filter(o => (o.status||'').toLowerCase() === st.toLowerCase());
+      if(q){
+        list = list.filter(o => [
+          o.token, o.name, o.phone, o.email, (o.klass||o.class), (o.notes||'')
+        ].some(v => String(v||'').toLowerCase().includes(q)));
+      }
+
+      orderRows.innerHTML = list.map(o=>{
+        const items = (o.lines||[]).map(i=>`${i.name||i.title||'Item'} × ${i.qty||1}`).join(', ') || '-';
+        const status = o.status || 'Pending';
+        return `<tr>
+          <td><b>${o.token||'-'}</b><br/><span class="muted">${fmt(o.createdAt)}</span></td>
+          <td>
+            <b>${o.name||'-'}</b><br/>
+            <span class="muted">${o.phone||''}</span><br/>
+            <span class="muted">${o.email||''}</span><br/>
+            ${o.klass ? `<span class="pill">Class: ${o.klass}</span>`:''}
+          </td>
+          <td><span class="tag">${o.pay||'—'}</span></td>
+          <td>${money(o.total)}</td>
+          <td>${items}</td>
+          <td><span class="tag">${status}</span></td>
+          <td>
+            <div class="row">
+              <button class="btn good" onclick="A_setStatus('${o.token}','Paid')">Paid</button>
+              <button class="btn" onclick="A_setStatus('${o.token}','Ready')">Ready</button>
+              <button class="btn" onclick="A_setStatus('${o.token}','Delivered')">Delivered</button>
+              <button class="btn warn" onclick="A_setStatus('${o.token}','Cancelled')">Cancel</button>
+              <button class="btn bad" onclick="A_delete('${o.token}')">Delete</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('') || `<tr><td colspan="7" class="muted">No orders yet.</td></tr>`;
+    }
+
+    window.A_setStatus = function(token, status){
+      const list = getOrders();
+      const i = list.findIndex(o=>o.token===token);
+      if(i>=0){
+        list[i].status = status;
+        list[i].updatedAt = new Date().toISOString();
+        setOrders(list);
+        renderOrders();
+      }
+    };
+
+    window.A_delete = function(token){
+      if(!confirm('Delete this order?')) return;
+      const list = getOrders().filter(o=>o.token!==token);
+      setOrders(list);
+      renderOrders();
+    };
+
+    // filters & actions
+    byId('fStatus').addEventListener('change', renderOrders);
+    byId('fSearch').addEventListener('input', renderOrders);
+    byId('fReset').addEventListener('click', ()=>{
+      byId('fStatus').value='';
+      byId('fSearch').value='';
+      renderOrders();
+    });
+
+    // export CSV
+    byId('btnExport').onclick = ()=>{
+      const list = getOrders();
+      if(!list.length){ alert('No orders to export.'); return; }
+      const rows = [
+        ['token','createdAt','updatedAt','name','phone','email','class','notes','pay','status','total','items']
+      ];
+      list.forEach(o=>{
+        const items = (o.lines||[]).map(i=>`${(i.name||i.title||'Item').replace(/,/g,';')} x ${i.qty||1}`).join(' | ');
+        rows.push([
+          o.token,o.createdAt,o.updatedAt,o.name||'',o.phone||'',o.email||'',
+          o.klass||o.class||'', (o.notes||'').replace(/\n/g,' '), o.pay||'', o.status||'',
+          o.total||0, items
+        ]);
+      });
+      const csv = rows.map(r=>r.map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'yRush_orders.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+    byId('btnClearAllOrders').onclick = ()=>{
+      if(confirm('Clear ALL orders?')){ save(ORDERS_KEY, []); renderOrders(); }
+    };
+
+    // live updates from checkout/history tabs (BroadcastChannel)
+    try{
+      if(typeof BroadcastChannel!=='undefined'){
+        const ch = new BroadcastChannel('yRush_orders');
+        ch.onmessage = ()=> renderOrders();
+      }
+      // also listen to storage events (another tab)
+      window.addEventListener('storage', (e)=>{ if(e.key===ORDERS_KEY) renderOrders(); });
+    }catch(e){}
+
+    /* ====== PRINT INBOX (merged) ====== */
+    const PI_KEY = 'yrush_print_jobs';
+    const PI_DONE_KEY = 'yrush_print_jobs_done';
+    const piRows = byId('pi_rows');
+
+    function PI_render(){
+      const jobs = load(PI_KEY).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+      piRows.innerHTML = jobs.map(j=>{
+        const fhtml = (j.files||[]).map((f,idx)=>{
+          const name = f.name || `file-${idx+1}`;
+          return `<a class="btn" download="${name}" href="${f.dataUrl}">⬇️ ${name}</a>`;
+        }).join(' ');
+        const o = j.options||{};
+        const optStr = `
+          Copies: <b>${o.copies||1}</b><br/>
+          Color: <b>${o.color||'BW'}</b>, Sides: <b>${o.sides||'single'}</b><br/>
+          Paper: <b>${o.paper||'A4'}</b><br/>
+          Pages: <b>${o.pages||'-'}</b><br/>
+          Notes: <b>${o.notes||'-'}</b>
+        `;
+        return `<tr>
+          <td><b>${j.id}</b><br/><span class="muted">${fmt(j.createdAt)}</span></td>
+          <td><b>${j.customer?.name||'-'}</b><br/><span class="muted">${j.customer?.phone||''}</span></td>
+          <td>${optStr}</td>
+          <td>${fhtml || '<span class="muted">No files</span>'}</td>
+          <td><span class="tag">${j.status||'Queued'}</span></td>
+          <td>
+            <button class="btn good" onclick="PI_markPrinted('${j.id}')">Printed</button>
+            <button class="btn" onclick="PI_removeJob('${j.id}')">Remove</button>
+          </td>
+        </tr>`;
+      }).join('') || `<tr><td colspan="6" class="muted">No print jobs yet.</td></tr>`;
+    }
+
+    window.PI_markPrinted = function(id){
+      const jobs = load(PI_KEY);
+      const idx = jobs.findIndex(j=>j.id===id);
+      if(idx>=0){
+        const [job] = jobs.splice(idx,1);
+        job.status = 'Printed';
+        const done = load(PI_DONE_KEY);
+        done.push(job);
+        save(PI_DONE_KEY, done);
+        save(PI_KEY, jobs);
+        PI_render();
+      }
+    };
+
+    window.PI_removeJob = function(id){
+      const jobs = load(PI_KEY).filter(j=>j.id!==id);
+      save(PI_KEY, jobs);
+      PI_render();
+    };
+
+    byId('pi_refresh').addEventListener('click', PI_render);
+    byId('pi_clearAll').addEventListener('click', ()=>{
+      if(confirm('Clear ALL pending print jobs?')){ save(PI_KEY, []); PI_render(); }
+    });
+
+    try{
+      if(typeof BroadcastChannel!=='undefined'){
+        const ch = new BroadcastChannel('yRush_print');
+        ch.onmessage = (msg)=>{ if(msg?.data?.type==='PRINT_JOB_NEW'){ PI_render(); } };
+      }
+      window.addEventListener('storage', (e)=>{ if(e.key===PI_KEY) PI_render(); });
+    }catch(e){}
+
+    // initial renders
+    renderOrders();
+    PI_render();
+  </script>
+</body>
+</html>

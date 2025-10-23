@@ -1,47 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
   <title>yRush · Payment</title>
-  <link rel="stylesheet" href="assets/app.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--panel);color:var(--text)}
-    .card{background:var(--card);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center;width:320px}
-    .btn{margin-top:16px;width:100%}
-    img{width:180px;height:180px;margin:12px auto;border-radius:8px;display:block}
+    :root{
+      --bg:#0b0d10;--panel:#12151a;--text:#e5e7eb;--muted:#9aa4b5;
+      --accent:#60e7d7;--border:#202734
+    }
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+      display:flex;justify-content:center;align-items:center;
+      min-height:100vh;
+    }
+    .wrap{
+      background:var(--panel);padding:30px 25px;
+      border-radius:18px;border:1px solid var(--border);
+      text-align:center;max-width:400px;width:90%;
+    }
+    h1{margin:0 0 10px}
+    p{color:var(--muted);font-size:14px;margin-bottom:20px}
+    img.qr{
+      width:260px;height:260px;border-radius:10px;
+      border:1px solid var(--border);margin-bottom:20px;
+    }
+    button{
+      background:var(--accent);border:none;
+      color:#0b0d10;font-weight:700;
+      padding:12px 22px;border-radius:12px;
+      cursor:pointer;font-size:16px;
+      transition:background .25s;
+    }
+    button:hover{background:#3dcfc0;}
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>UPI Payment</h2>
-    <p>Scan the QR below or click “Simulate Payment Success”.</p>
-    <!-- Replace with your actual QR if you have one -->
-    <img src="assets/upi_qr.png" alt="UPI QR">
+  <div class="wrap">
+    <h1>Scan & Pay</h1>
+    <p>Scan this QR code using any UPI app (GPay / PhonePe / Paytm)</p>
 
-    <button class="btn btn-primary" id="successBtn">✅ Simulate Payment Success</button>
-    <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
+    <!-- your QR image -->
+    <img class="qr" src="images/qr.png" alt="UPI QR Code">
+
+    <!-- simple redirect button -->
+    <button id="doneBtn">Payment Done</button>
   </div>
 
-  <script>
-    const params = new URLSearchParams(location.search);
-    const token  = params.get('token');
-    const back   = params.get('return') || 'checkout.html';
+<script>
+  document.getElementById('doneBtn').onclick = function () {
+    localStorage.setItem('paymentDone', '1');  // flag for checkout/admin
+    window.location.href = "paymentDone.html"; // ✅ redirect to success page
+  };
+</script>
 
-    // disable success if someone opened this page directly
-    const successBtn = document.getElementById('successBtn');
-    if(!token){ successBtn.disabled = true; successBtn.textContent = 'No token found'; }
-
-    successBtn.onclick = ()=>{
-      // Mark this token paid and return to the exact page we came from
-      localStorage.setItem('paymentSuccess', token);
-      window.location.replace(back);
-    };
-
-    document.getElementById('cancelBtn').onclick = ()=>{
-      // Return without marking success
-      window.location.replace(back);
-    };
-  </script>
 </body>
 </html>
