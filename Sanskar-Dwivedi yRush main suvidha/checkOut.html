@@ -9,10 +9,10 @@
     .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:800px){ .two{grid-template-columns:1fr} }
     .box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
-    .row{display:flex;gap:10px;align-items:center}  
-    .mt-16{margin-top:16px}   
-    #whatsappBtn{display:block;width:100%} 
-    </style>
+    .row{display:flex;gap:10px;align-items:center}
+    .mt-16{margin-top:16px}
+    #whatsappBtn{display:block;width:100%}
+  </style>
 </head>
 <body>
 <header>
@@ -27,6 +27,7 @@
   <div class="two" style="margin-top:14px">
     <section class="box">
       <h3>Contact & Pickup</h3>
+
       <form id="orderForm">
         <div class="row">
           <div style="flex:1">
@@ -35,9 +36,10 @@
           </div>
           <div style="flex:1">
             <label>Class / Dept</label>
-            <input id="klass" class="input" placeholder="e.g., CSE‑B" required>
+            <input id="klass" class="input" placeholder="e.g., CSE-B" required>
           </div>
         </div>
+
         <div class="row">
           <div style="flex:1">
             <label>Phone</label>
@@ -48,11 +50,11 @@
             <input id="email" class="input" type="email" autocomplete="email" required>
           </div>
         </div>
+
         <div class="row">
           <div style="flex:1">
             <label>Payment</label>
             <select id="pay" class="select">
-
               <option>UPI at pickup</option>
               <option>UPI (online)</option>
             </select>
@@ -62,21 +64,23 @@
             <input id="notes" class="input" placeholder="Any special request?">
           </div>
         </div>
-        <div class="row" style="margin-top:10px">
-    <button class="btn btn-primary" type="submit" style="flex:1">Place order</button>
-    <button class="btn btn-ghost" id="clear" type="button">Clear cart</button>
-</div>
 
-<!-- Add WhatsApp button after order is placed -->
-<div id="whatsappSection" class="mt-16" style="display:none;">
-  <a class="btn btn-primary" id="whatsappBtn" target="_blank" style="background:#25D366;color:#fff;">
-    📱 Notify Seller via WhatsApp
-  </a>
-</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" type="submit" style="flex:1">Place order</button>
+          <button class="btn btn-ghost" id="clear" type="button">Clear cart</button>
+        </div>
+
+        <!-- WhatsApp button (shown after order is placed) -->
+        <div id="whatsappSection" class="mt-16" style="display:none;">
+          <a class="btn btn-primary" id="whatsappBtn" target="_blank" style="background:#25D366;color:#fff;">
+            📱 Notify Seller via WhatsApp
+          </a>
+        </div>
       </form>
+
       <div id="orderResult" style="margin-top:12px"></div>
       <div class="hint" id="tokenWarning" style="margin-top:6px;color:var(--muted)">
-        Do not share your order token with anyone(except shopkeeper).
+        Do not share your order token with anyone (except shopkeeper).
       </div>
     </section>
 
@@ -84,7 +88,8 @@
       <h3>Order summary</h3>
       <div id="summary"></div>
       <hr>
-      <div class="total"><span>Subtotal</span><span id="subtotal">₹0</span></div>      <hr>
+      <div class="total"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+      <hr>
       <div class="total"><span>Total</span><span id="total">₹0</span></div>
     </aside>
   </div>
@@ -128,7 +133,7 @@
       }
       tbody.innerHTML = orders.map(o=>{
         const date = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : '—';
-        const items = Array.isArray(o.lines) ? o.lines.map(l=>`${l.name}×${l.qty}`).join(', ') : '';
+        const items = Array.isArray(o.lines) ? o.lines.map(l=>\`${l.name}×${l.qty}\`).join(', ') : '';
         return `<tr><td>${o.token}</td><td>${date}</td><td>${o.name || '—'}</td><td>${items}</td><td>${yRush.money(o.total||0)}</td><td>${o.status||'—'}</td></tr>`;
       }).join('');
     }catch(err){
@@ -137,7 +142,63 @@
     }
   }
 
+  // ---- Return-from-payment handler (must run early) ----
+  const paidToken = localStorage.getItem('paymentSuccess');
+  if(paidToken){
+    const pendingJSON = localStorage.getItem('pendingOrder');
+    try{
+      const pending = pendingJSON ? JSON.parse(pendingJSON) : null;
+      if(pending && pending.token === paidToken){
+        pending.status = 'Paid';
+        const orders = yRush.getOrders();
+        const list = Array.isArray(orders) ? orders : [];
+        list.push(pending);
+        yRush.saveOrders(list);
+        localStorage.removeItem('pendingOrder');
+        localStorage.removeItem('paymentSuccess');
+        yRush.clearCart();
+
+        // Success UI
+        document.getElementById('orderResult').innerHTML =
+          `<div class="success">✅ Payment successful! Order placed.<br>Token: <strong>${paidToken}</strong></div>`;
+
+        // Show WhatsApp button for the paid order
+        showWhatsappForOrder(pending);
+        renderHistory();
+      } else {
+        // cleanup stray flag
+        localStorage.removeItem('paymentSuccess');
+      }
+    }catch(e){
+      console.warn('Pending parse error', e);
+      localStorage.removeItem('paymentSuccess');
+    }
+  }
+  // ------------------------------------------------------
+
   document.getElementById('clear').onclick = ()=>{ yRush.clearCart(); loadSummary(); };
+
+  // Helper to show WhatsApp CTA
+  function showWhatsappForOrder(order){
+    const whatsappSection = document.getElementById('whatsappSection');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+
+    const itemsList = (order.lines||[]).map(item => `${item.name} (Qty: ${item.qty})`).join('%0A- ');
+    const message =
+      `📦 New Order Alert!%0A%0A` +
+      `🆔 Token: ${order.token}%0A` +
+      `👤 Customer: ${order.name}%0A` +
+      `📞 Phone: ${order.phone}%0A` +
+      `🎓 Class: ${order.klass}%0A` +
+      `💰 Total: ${yRush.money(order.total||0)}%0A` +
+      `💳 Payment: ${order.status}%0A%0A` +
+      `📋 Items:%0A- ${itemsList}%0A%0A` +
+      `📝 Notes: ${order.notes || 'None'}`;
+
+    // Replace the phone with your seller's number (with country code, no +)
+    whatsappBtn.href = `https://wa.me/917820873853?text=${message}`;
+    whatsappSection.style.display = 'block';
+  }
 
   document.getElementById('orderForm').addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -145,110 +206,69 @@
     const origText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Placing…';
-    const name = document.getElementById('name').value.trim();
+
+    const name  = document.getElementById('name').value.trim();
     const klass = document.getElementById('klass').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const email = document.getElementById('email').value.trim();
-    const pay = document.getElementById('pay').value;
+    const pay   = document.getElementById('pay').value;
     const notes = document.getElementById('notes').value.trim();
-    
-    if(!/^\d{10}$/.test(phone)){ yRush.toast('Enter a 10-digit phone number'); 
-      submitBtn.disabled = false;
-      submitBtn.textContent = origText;
-      return; 
+
+    if(!/^\d{10}$/.test(phone)){
+      yRush.toast('Enter a 10-digit phone number');
+      submitBtn.disabled = false; submitBtn.textContent = origText; return;
     }
- 
+
     const totals = yRush.cartTotals();
- 
-    // Prevent placing orders with empty cart
     if(!Array.isArray(totals.lines) || !totals.lines.length){
       yRush.toast('Your cart is empty');
-      submitBtn.disabled = false;
-      submitBtn.textContent = origText;
-      return;
+      submitBtn.disabled = false; submitBtn.textContent = origText; return;
     }
- 
+
+    // If UPI Online -> go to payment page first
+    if (/upi/i.test(pay) && pay.toLowerCase().includes('online')) {
+      const tokenTemp = yRush.token6();
+      const pendingOrder = {
+        token: tokenTemp, user: u.email, name, klass, phone, email, pay, notes,
+        lines: totals.lines, subtotal: totals.subtotal, total: totals.total,
+        status: 'Pending Payment', createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('pendingOrder', JSON.stringify(pendingOrder));
+
+      const returnUrl = encodeURIComponent(location.href);
+      const paymentUrl = `payment.html?token=${tokenTemp}&return=${returnUrl}`;
+      window.location.href = paymentUrl;
+      return; // stop here; we’ll finalize after returning
+    }
+
+    // Otherwise: immediate (UPI at pickup) — save as Unpaid
     const token = yRush.token6();
-    // mark paid immediately if user selected online UPI
-let paid = false;
-if (pay && /upi/i.test(pay) && pay.toLowerCase().includes('online')) {
-  // Redirect to payment page before finalizing order
-  const tokenTemp = yRush.token6();
-  const paymentUrl = `payment.html?token=${tokenTemp}&name=${encodeURIComponent(name)}`;
-  localStorage.setItem('pendingOrder', JSON.stringify({
-    token: tokenTemp, user: u.email, name, klass, phone, email, pay, notes,
-    lines: totals.lines, subtotal: totals.subtotal, total: totals.total,
-    status: 'Pending Payment', createdAt: new Date().toISOString()
-  }));
-  window.location.href = paymentUrl;
-  return; // stop execution here, wait for redirect
-}
     const order = {
-      token,
-      user: u.email,
-      name, klass, phone, email, pay, notes,
-      lines: totals.lines,
-      subtotal: totals.subtotal,
-      total: totals.total,
-      status: paid ? 'Paid' : 'Unpaid',
-      createdAt: new Date().toISOString()
+      token, user: u.email, name, klass, phone, email, pay, notes,
+      lines: totals.lines, subtotal: totals.subtotal, total: totals.total,
+      status: 'Unpaid', createdAt: new Date().toISOString()
     };
     const orders = yRush.getOrders();
-    // guard if getOrders returned non-array
     const list = Array.isArray(orders) ? orders : [];
     list.push(order);
     yRush.saveOrders(list);
-    // clear cart but avoid calling loadSummary() (it redirects when cart empty)
+
+    // Clear cart + update UI without redirect
     yRush.clearCart();
-    // update the UI for summary/subtotal/total so page doesn't instantly redirect
     document.getElementById('summary').innerHTML = '';
     document.getElementById('subtotal').textContent = yRush.money(0);
     document.getElementById('total').textContent = yRush.money(0);
-    if(paid){
-    document.getElementById('orderResult').innerHTML = `<div class="success">Order placed and paid via UPI! Token: <strong>${token}</strong>. Keep payment screenshot; do not share token.</div>`;
-} else {
-    document.getElementById('orderResult').innerHTML = `<div class="success">Order placed! Token: <strong>${token}</strong>. Show this token at pickup.</div>`;
-}
 
-// ✅ ADD WHATSAPP CODE HERE
-const whatsappSection = document.getElementById('whatsappSection');
-const whatsappBtn = document.getElementById('whatsappBtn');
-
-// Create WhatsApp message
-const itemsList = totals.lines.map(item => `${item.name} (Qty: ${item.qty})`).join('%0A- ');
-const message = `📦 New Order Alert!%0A%0A🆔 Token: ${token}%0A👤 Customer: ${name}%0A📞 Phone: ${phone}%0A🎓 Class: ${klass}%0A💰 Total: ${yRush.money(totals.total)}%0A💳 Payment: ${pay}%0A%0A📋 Items:%0A- ${itemsList}%0A%0A📝 Notes: ${notes || 'None'}`;
-
-// Update WhatsApp button (REPLACE XXXXXXXXXX WITH SELLER'S PHONE NUMBER)
-whatsappBtn.href = `https://wa.me/917820873853?text=${message}`;
-
-// Show WhatsApp button
-whatsappSection.style.display = 'block';
-
-// THEN continue with existing code
-submitBtn.disabled = false;
-submitBtn.textContent = origText;
-document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
-renderHistory();
-  });
-  // If returned from payment.html and payment was successful
-const paidToken = localStorage.getItem('paymentSuccess');
-if(paidToken){
-  const pending = JSON.parse(localStorage.getItem('pendingOrder') || '{}');
-  if(pending && pending.token === paidToken){
-    pending.status = 'Paid';
-    const orders = yRush.getOrders();
-    const list = Array.isArray(orders) ? orders : [];
-    list.push(pending);
-    yRush.saveOrders(list);
-    localStorage.removeItem('pendingOrder');
-    localStorage.removeItem('paymentSuccess');
-    yRush.clearCart();
     document.getElementById('orderResult').innerHTML =
-      `<div class="success">✅ Payment successful! Order placed.<br>Token: <strong>${paidToken}</strong></div>`;
-    renderHistory();
-  }
-}
+      `<div class="success">Order placed! Token: <strong>${token}</strong>. Show this token at pickup.</div>`;
 
+    showWhatsappForOrder(order);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = origText;
+    document.getElementById('orderResult').scrollIntoView({behavior:'smooth', block:'center'});
+    renderHistory();
+  });
 
   loadSummary();
   renderHistory();
