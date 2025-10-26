@@ -1,318 +1,858 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>yRush · Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#0b0d10;--panel:#12151a;--text:#e5e7eb;--muted:#9aa4b5;
-      --border:#202734;--accent:#60e7d7;--good:#10B981;--warn:#F59E0B;--bad:#ef4444
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1200px;margin:28px auto;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:16px}
-    h1{margin:0 0 8px}
-    h2{margin:16px 0 8px}
-    .muted{color:var(--muted)}
-    .topbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
-    .btn{
-      display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--border);
-      cursor:pointer;text-decoration:none;color:var(--text);background:transparent
-    }
-    .btn.primary{background:var(--accent);color:#0b0d10;border-color:#1f3b3b;font-weight:700}
-    .btn.good{background:var(--good);color:#052b23;border-color:#065f46;font-weight:700}
-    .btn.warn{background:var(--warn);color:#241a05;border-color:#7c5706;font-weight:700}
-    .btn.bad{background:var(--bad);color:#2a0909;border-color:#7f1d1d;font-weight:700}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .panel{border:1px solid var(--border);border-radius:12px;padding:12px;background:#0e1319}
-    input,select{background:#0e1319;border:1px solid var(--border);color:var(--text);padding:8px;border-radius:10px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-    th{color:var(--muted)}
-    .tag{display:inline-block;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--muted)}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .hr{height:1px;background:var(--border);margin:16px 0}
-    .pill{display:inline-block;padding:4px 8px;font-size:12px;border-radius:999px;border:1px solid var(--border);background:#0b1118;color:var(--muted)}
-    code.k{background:#0b1118;border:1px solid var(--border);padding:2px 6px;border-radius:6px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yRush · Admin Dashboard</title>
+    <style>
+        :root {
+            --bg: #0b0d10;
+            --panel: #12151a;
+            --muted: #8892a6;
+            --card: #151a21;
+            --border: #202734;
+            --brand: #5eead4;
+            --brand-600: #2dd4bf;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 6px 20px rgba(0,0,0,.25);
+            --radius: 12px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--bg);
+            color: #e5e7eb;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            margin-bottom: 24px;
+        }
+        
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        /* .logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: radial-gradient(circle at 30% 30%, var(--brand), var(--brand-600));
+        } */
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--brand);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Orders Table */
+        .orders-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .select {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: #e5e7eb;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .table th {
+            background: var(--panel);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* Status Badges */
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        
+        .status-paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .status-unpaid {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        .status-ready {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+        
+        .status-completed {
+            background: rgba(107, 114, 128, 0.2);
+            color: #6b7280;
+            border: 1px solid #6b7280;
+        }
+        
+        /* Action Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--brand);
+            color: #04221f;
+        }
+        
+        .btn-primary:hover {
+            background: var(--brand-600);
+        }
+        
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+        
+        .btn-ghost:hover {
+            background: var(--border);
+            color: #e5e7eb;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Order Details */
+        .order-details {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .order-items {
+            margin: 16px 0;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #e5e7eb;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 10000;
+            font-weight: 600;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        /* Connection Status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: var(--danger);
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <a class="btn" href="list.html">🏠 Home</a>
-      <a class="btn" href="checkOut.html">🛒 Checkout</a>
-      <a class="btn" href="history.html">🕘 History</a>
-      <a class="btn" href="xerox.html">🖨️ Xerox Upload</a>
-      <button id="btnExport" class="btn">⬇️ Export CSV</button>
-      <button id="btnClearAllOrders" class="btn bad">🗑️ Clear All Orders</button>
-    </div>
-
-    <h1>Admin</h1>
-    <p class="muted">Manage orders and print jobs. Live updates from checkout and xerox pages.</p>
-
-    <!-- ORDERS SECTION -->
-    <section id="orders">
-      <h2>🧾 Orders</h2>
-
-      <div class="panel">
-        <div class="row" style="margin-bottom:8px">
-          <div><b>Filters:</b></div>
-          <select id="fStatus">
-            <option value="">All Status</option>
-            <option>Pending</option>
-            <option>Paid</option>
-            <option>Ready</option>
-            <option>Delivered</option>
-            <option>Cancelled</option>
-          </select>
-          <input id="fSearch" placeholder="Search token/name/phone/email…" />
-          <button id="fReset" class="btn">Reset</button>
-        </div>
-
-        <div style="overflow:auto;border:1px solid var(--border);border-radius:12px">
-          <table id="tblOrders">
-            <thead>
-              <tr style="background:#0e1319">
-                <th>Token / Time</th>
-                <th>Customer</th>
-                <th>Payment</th>
-                <th>Total</th>
-                <th>Items</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="orderRows"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <div class="hr"></div>
-
-    <!-- PRINT INBOX SECTION (merged) -->
-    <section id="printInboxSection">
-      <h2>🖨️ Print Inbox</h2>
-      <p class="muted">New jobs sent from <code class="k">xerox.html</code> appear here automatically. Click a file to download/print, then mark as <b>Printed</b>.</p>
-
-      <div class="row" style="margin:8px 0 12px">
-        <button id="pi_refresh" class="btn">🔄 Refresh</button>
-        <button id="pi_clearAll" class="btn">🗑️ Clear All</button>
-        <a href="xerox.html" class="btn">⬆️ Open Upload (Xerox)</a>
-      </div>
-
-      <div style="overflow:auto;border:1px solid var(--border);border-radius:12px">
-        <table id="pi_table">
-          <thead>
-            <tr style="background:#0e1319">
-              <th>ID / Time</th>
-              <th>Customer</th>
-              <th>Options</th>
-              <th>Files</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="pi_rows"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    /* ====== Shared helpers ====== */
-    const $ = sel => document.querySelector(sel);
-    const byId = id => document.getElementById(id);
-    const load = k => { try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return [];} };
-    const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-    const fmt = dt => { try{ return new Date(dt).toLocaleString('en-IN'); } catch{ return dt; } };
-    const money = n => '₹' + (Number(n)||0).toFixed(2);
-
-    /* ====== ORDERS ====== */
-    const ORDERS_KEY = 'yRush_orders';
-    const orderRows = byId('orderRows');
-
-    function getOrders(){ return load(ORDERS_KEY); }
-    function setOrders(list){ save(ORDERS_KEY, list); }
-
-    function renderOrders(){
-      const q = (byId('fSearch').value||'').toLowerCase();
-      const st = byId('fStatus').value || '';
-
-      let list = getOrders().sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
-
-      if(st) list = list.filter(o => (o.status||'').toLowerCase() === st.toLowerCase());
-      if(q){
-        list = list.filter(o => [
-          o.token, o.name, o.phone, o.email, (o.klass||o.class), (o.notes||'')
-        ].some(v => String(v||'').toLowerCase().includes(q)));
-      }
-
-      orderRows.innerHTML = list.map(o=>{
-        const items = (o.lines||[]).map(i=>`${i.name||i.title||'Item'} × ${i.qty||1}`).join(', ') || '-';
-        const status = o.status || 'Pending';
-        return `<tr>
-          <td><b>${o.token||'-'}</b><br/><span class="muted">${fmt(o.createdAt)}</span></td>
-          <td>
-            <b>${o.name||'-'}</b><br/>
-            <span class="muted">${o.phone||''}</span><br/>
-            <span class="muted">${o.email||''}</span><br/>
-            ${o.klass ? `<span class="pill">Class: ${o.klass}</span>`:''}
-          </td>
-          <td><span class="tag">${o.pay||'—'}</span></td>
-          <td>${money(o.total)}</td>
-          <td>${items}</td>
-          <td><span class="tag">${status}</span></td>
-          <td>
-            <div class="row">
-              <button class="btn good" onclick="A_setStatus('${o.token}','Paid')">Paid</button>
-              <button class="btn" onclick="A_setStatus('${o.token}','Ready')">Ready</button>
-              <button class="btn" onclick="A_setStatus('${o.token}','Delivered')">Delivered</button>
-              <button class="btn warn" onclick="A_setStatus('${o.token}','Cancelled')">Cancel</button>
-              <button class="btn bad" onclick="A_delete('${o.token}')">Delete</button>
+    <header>
+        <div class="container">
+            <div class="nav">
+                <div class="brand">
+                    <div class="logo"></div>
+                    <span>yRush Admin</span>
+                </div>
+                <div class="filters">
+                    <div class="connection-status">
+                        <div class="status-dot" id="connectionStatus"></div>
+                        <span id="connectionText">Live Updates</span>
+                    </div>
+                    <select id="statusFilter" class="select">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="ready">Ready</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                    <select id="paymentFilter" class="select">
+                        <option value="">All Payments</option>
+                        <option value="upi-online">UPI Online</option>
+                        <option value="upi-pickup">UPI at Pickup</option>
+                        <option value="cash">Cash</option>
+                    </select>
+                    <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+                </div>
             </div>
-          </td>
-        </tr>`;
-      }).join('') || `<tr><td colspan="7" class="muted">No orders yet.</td></tr>`;
-    }
+        </div>
+    </header>
 
-    window.A_setStatus = function(token, status){
-      const list = getOrders();
-      const i = list.findIndex(o=>o.token===token);
-      if(i>=0){
-        list[i].status = status;
-        list[i].updatedAt = new Date().toISOString();
-        setOrders(list);
-        renderOrders();
-      }
-    };
+    <main class="container">
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalOrders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingOrders">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="paidOrders">0</div>
+                <div class="stat-label">Paid</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayOrders">0</div>
+                <div class="stat-label">Today's Orders</div>
+            </div>
+        </div>
 
-    window.A_delete = function(token){
-      if(!confirm('Delete this order?')) return;
-      const list = getOrders().filter(o=>o.token!==token);
-      setOrders(list);
-      renderOrders();
-    };
+        <!-- Orders Table -->
+        <section class="orders-section">
+            <div class="section-header">
+                <h2>📋 Recent Orders</h2>
+                <div class="filters">
+                    <button id="clearCompleted" class="btn btn-ghost">Clear Completed</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Contact</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Orders will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <h3>No orders yet</h3>
+                <p>Orders will appear here when customers place them</p>
+            </div>
+        </section>
 
-    // filters & actions
-    byId('fStatus').addEventListener('change', renderOrders);
-    byId('fSearch').addEventListener('input', renderOrders);
-    byId('fReset').addEventListener('click', ()=>{
-      byId('fStatus').value='';
-      byId('fSearch').value='';
-      renderOrders();
-    });
+        <!-- Selected Order Details -->
+        <div id="orderDetails" class="order-details" style="display: none;">
+            <h3>Order Details - Token: <span id="detailToken"></span></h3>
+            <div class="order-info">
+                <p><strong>Customer:</strong> <span id="detailCustomer"></span></p>
+                <p><strong>Phone:</strong> <span id="detailPhone"></span></p>
+                <p><strong>Email:</strong> <span id="detailEmail"></span></p>
+                <p><strong>Class:</strong> <span id="detailClass"></span></p>
+                <p><strong>Payment Method:</strong> <span id="detailPayment"></span></p>
+                <p><strong>Notes:</strong> <span id="detailNotes"></span></p>
+            </div>
+            
+            <div class="order-items">
+                <h4>Items:</h4>
+                <div id="detailItems"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="markReadyBtn" class="btn btn-success">Mark as Ready</button>
+                <button id="markCompletedBtn" class="btn btn-primary">Mark as Completed</button>
+                <button id="contactCustomerBtn" class="btn btn-ghost">Contact Customer</button>
+            </div>
+        </div>
+    </main>
 
-    // export CSV
-    byId('btnExport').onclick = ()=>{
-      const list = getOrders();
-      if(!list.length){ alert('No orders to export.'); return; }
-      const rows = [
-        ['token','createdAt','updatedAt','name','phone','email','class','notes','pay','status','total','items']
-      ];
-      list.forEach(o=>{
-        const items = (o.lines||[]).map(i=>`${(i.name||i.title||'Item').replace(/,/g,';')} x ${i.qty||1}`).join(' | ');
-        rows.push([
-          o.token,o.createdAt,o.updatedAt,o.name||'',o.phone||'',o.email||'',
-          o.klass||o.class||'', (o.notes||'').replace(/\n/g,' '), o.pay||'', o.status||'',
-          o.total||0, items
-        ]);
-      });
-      const csv = rows.map(r=>r.map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-      const blob = new Blob([csv], {type:'text/csv'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'yRush_orders.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    };
+    <!-- Notification Element -->
+    <div id="notification" class="notification"></div>
 
-    byId('btnClearAllOrders').onclick = ()=>{
-      if(confirm('Clear ALL orders?')){ save(ORDERS_KEY, []); renderOrders(); }
-    };
+    <script>
+        // Admin Dashboard with Real-Time Sync
+        class AdminDashboard {
+            constructor() {
+                this.orders = [];
+                this.selectedOrder = null;
+                this.refreshInterval = null;
+                this.pollingInterval = null;
+                this.broadcastChannel = null;
+                this.lastOrderHash = '';
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 Initializing Admin Dashboard...');
+                this.setupBroadcastChannel();
+                this.loadOrders();
+                this.setupEventListeners();
+                this.startPolling();
+                this.updateConnectionStatus(true);
+            }
+            
+            setupBroadcastChannel() {
+                // Use BroadcastChannel for real-time communication between tabs
+                if (typeof BroadcastChannel !== 'undefined') {
+                    this.broadcastChannel = new BroadcastChannel('yRush_orders');
+                    
+                    this.broadcastChannel.addEventListener('message', (event) => {
+                        console.log('📡 BroadcastChannel message received:', event.data);
+                        if (event.data.type === 'ORDERS_UPDATED') {
+                            this.loadOrders();
+                            this.showNotification('🔄 Orders updated from another tab');
+                        } else if (event.data.type === 'NEW_ORDER') {
+                            this.addOrderFromBroadcast(event.data.order);
+                        }
+                    });
+                    
+                    console.log('✅ BroadcastChannel initialized');
+                } else {
+                    console.warn('❌ BroadcastChannel not supported');
+                }
+            }
+            
+            loadOrders() {
+                try {
+                    const ordersData = localStorage.getItem('yRush_orders');
+                    const previousCount = this.orders.length;
+                    const previousHash = this.lastOrderHash;
+                    
+                    this.orders = ordersData ? JSON.parse(ordersData) : [];
+                    
+                    // Create a simple hash to detect actual changes
+                    const currentHash = JSON.stringify(this.orders.map(o => ({token: o.token, status: o.status})).sort());
+                    
+                    // Only update if orders actually changed
+                    if (currentHash !== previousHash) {
+                        this.lastOrderHash = currentHash;
+                        
+                        // Check if new orders were added
+                        if (this.orders.length > previousCount) {
+                            const newOrderCount = this.orders.length - previousCount;
+                            this.showNotification(`📦 ${newOrderCount} new order${newOrderCount > 1 ? 's' : ''} received!`);
+                        }
+                        
+                        this.render();
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading orders:', error);
+                    this.orders = [];
+                }
+            }
+            
+            addOrderFromBroadcast(order) {
+                // Add order directly without full reload
+                const existingIndex = this.orders.findIndex(o => o.token === order.token);
+                
+                if (existingIndex === -1) {
+                    this.orders.unshift(order); // Add to beginning
+                    this.saveOrdersSilent(); // Save without triggering events
+                    this.render();
+                    this.showNotification(`📦 New order received: ${order.token}`);
+                }
+            }
+            
+            saveOrders() {
+                localStorage.setItem('yRush_orders', JSON.stringify(this.orders));
+                
+                // Notify other tabs via BroadcastChannel
+                if (this.broadcastChannel) {
+                    this.broadcastChannel.postMessage({
+                        type: 'ORDERS_UPDATED',
+                        timestamp: Date.now(),
+                        orderCount: this.orders.length
+                    });
+                }
+                
+                // Also trigger storage event for fallback
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'yRush_orders',
+                    newValue: JSON.stringify(this.orders)
+                }));
+            }
+            
+            saveOrdersSilent() {
+                // Save without notifying other tabs (used when adding from broadcast)
+                localStorage.setItem('yRush_orders', JSON.stringify(this.orders));
+            }
+            
+            render() {
+                this.renderStats();
+                this.renderOrdersTable();
+            }
+            
+            renderStats() {
+                const now = new Date();
+                const today = now.toDateString();
+                
+                const total = this.orders.length;
+                const pending = this.orders.filter(o => 
+                    o.status === 'Pending Payment' || o.status === 'Pending' || !o.status
+                ).length;
+                const paid = this.orders.filter(o => o.status === 'Paid').length;
+                const todayOrders = this.orders.filter(o => {
+                    const orderDate = new Date(o.createdAt).toDateString();
+                    return orderDate === today;
+                }).length;
+                
+                document.getElementById('totalOrders').textContent = total;
+                document.getElementById('pendingOrders').textContent = pending;
+                document.getElementById('paidOrders').textContent = paid;
+                document.getElementById('todayOrders').textContent = todayOrders;
+            }
+            
+            renderOrdersTable() {
+                const tbody = document.getElementById('ordersTableBody');
+                const emptyState = document.getElementById('emptyState');
+                
+                if (this.orders.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                
+                // Apply filters
+                const statusFilter = document.getElementById('statusFilter').value;
+                const paymentFilter = document.getElementById('paymentFilter').value;
+                
+                let filteredOrders = [...this.orders];
+                
+                if (statusFilter) {
+                    filteredOrders = filteredOrders.filter(order => 
+                        order.status && order.status.toLowerCase().includes(statusFilter.toLowerCase())
+                    );
+                }
+                
+                if (paymentFilter) {
+                    filteredOrders = filteredOrders.filter(order => 
+                        order.pay && order.pay.toLowerCase().includes(paymentFilter.toLowerCase())
+                    );
+                }
+                
+                // Sort by date (newest first)
+                filteredOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                tbody.innerHTML = filteredOrders.map(order => {
+                    const date = new Date(order.createdAt).toLocaleString('en-IN');
+                    const itemsCount = order.lines ? order.lines.length : 0;
+                    
+                    // Determine status class
+                    let statusClass = 'status-pending';
+                    let statusText = order.status || 'Pending';
+                    
+                    if (order.status === 'Paid') {
+                        statusClass = 'status-paid';
+                    } else if (order.status === 'Unpaid') {
+                        statusClass = 'status-unpaid';
+                    } else if (order.status === 'Ready') {
+                        statusClass = 'status-ready';
+                    } else if (order.status === 'Completed') {
+                        statusClass = 'status-completed';
+                    }
+                    
+                    return `
+                        <tr data-token="${order.token}">
+                            <td><strong>${order.token}</strong></td>
+                            <td>${date}</td>
+                            <td>${order.name || 'Walk-in Customer'}</td>
+                            <td>${order.phone || 'N/A'}</td>
+                            <td>${itemsCount} items</td>
+                            <td>₹${order.total || 0}</td>
+                            <td>${order.pay || 'Cash'}</td>
+                            <td><span class="status ${statusClass}">${statusText}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-ghost view-order" data-token="${order.token}">View</button>
+                                    ${order.status !== 'Completed' ? 
+                                        `<button class="btn btn-success complete-order" data-token="${order.token}">Complete</button>` : 
+                                        ''
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            startPolling() {
+                // Poll every 2 seconds as backup to BroadcastChannel
+                this.pollingInterval = setInterval(() => {
+                    this.loadOrders();
+                }, 2000);
+            }
+            
+            showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            updateConnectionStatus(connected) {
+                const statusDot = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('connectionText');
+                
+                if (connected) {
+                    statusDot.classList.remove('offline');
+                    statusText.textContent = this.broadcastChannel ? 'Live Updates' : 'Polling Active';
+                } else {
+                    statusDot.classList.add('offline');
+                    statusText.textContent = 'Offline';
+                }
+            }
+            
+            showOrderDetails(token) {
+                const order = this.orders.find(o => o.token === token);
+                if (!order) return;
+                
+                this.selectedOrder = order;
+                
+                document.getElementById('detailToken').textContent = order.token;
+                document.getElementById('detailCustomer').textContent = order.name || 'Walk-in Customer';
+                document.getElementById('detailPhone').textContent = order.phone || 'N/A';
+                document.getElementById('detailEmail').textContent = order.email || 'N/A';
+                document.getElementById('detailClass').textContent = order.klass || 'N/A';
+                document.getElementById('detailPayment').textContent = order.pay || 'Cash';
+                document.getElementById('detailNotes').textContent = order.notes || 'No special instructions';
+                
+                // Render items
+                const itemsContainer = document.getElementById('detailItems');
+                if (order.lines && order.lines.length > 0) {
+                    itemsContainer.innerHTML = order.lines.map(item => `
+                        <div class="order-item">
+                            <span>${item.name} × ${item.qty}</span>
+                            <span>₹${(item.price * item.qty).toFixed(2)}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    itemsContainer.innerHTML = '<p>No items found</p>';
+                }
+                
+                document.getElementById('orderDetails').style.display = 'block';
+            }
+            
+            updateOrderStatus(token, newStatus) {
+                const orderIndex = this.orders.findIndex(o => o.token === token);
+                if (orderIndex !== -1) {
+                    this.orders[orderIndex].status = newStatus;
+                    this.orders[orderIndex].updatedAt = new Date().toISOString();
+                    this.saveOrders();
+                    this.render();
+                    
+                    if (this.selectedOrder && this.selectedOrder.token === token) {
+                        this.selectedOrder.status = newStatus;
+                    }
+                    
+                    this.showNotification(`✅ Order ${token} marked as ${newStatus}`);
+                }
+            }
+            
+            clearCompletedOrders() {
+                if (confirm('Are you sure you want to clear all completed orders?')) {
+                    const completedCount = this.orders.filter(o => o.status === 'Completed').length;
+                    this.orders = this.orders.filter(order => order.status !== 'Completed');
+                    this.saveOrders();
+                    this.render();
+                    this.showNotification(`✅ Cleared ${completedCount} completed orders`);
+                }
+            }
+            
+            setupEventListeners() {
+                // Refresh button
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadOrders();
+                    this.showNotification('🔄 Manual refresh completed');
+                });
+                
+                // Filters
+                document.getElementById('statusFilter').addEventListener('change', () => {
+                    this.renderOrdersTable();
+                });
+                
+                document.getElementById('paymentFilter').addEventListener('change', () => {
+                    this.renderOrdersTable();
+                });
+                
+                // Clear completed
+                document.getElementById('clearCompleted').addEventListener('click', () => {
+                    this.clearCompletedOrders();
+                });
+                
+                // Table actions (delegated)
+                document.getElementById('ordersTableBody').addEventListener('click', (e) => {
+                    const viewBtn = e.target.closest('.view-order');
+                    const completeBtn = e.target.closest('.complete-order');
+                    
+                    if (viewBtn) {
+                        const token = viewBtn.dataset.token;
+                        this.showOrderDetails(token);
+                    }
+                    
+                    if (completeBtn) {
+                        const token = completeBtn.dataset.token;
+                        this.updateOrderStatus(token, 'Completed');
+                    }
+                });
+                
+                // Order detail actions
+                document.getElementById('markReadyBtn').addEventListener('click', () => {
+                    if (this.selectedOrder) {
+                        this.updateOrderStatus(this.selectedOrder.token, 'Ready');
+                        document.getElementById('orderDetails').style.display = 'none';
+                        this.selectedOrder = null;
+                    }
+                });
+                
+                document.getElementById('markCompletedBtn').addEventListener('click', () => {
+                    if (this.selectedOrder) {
+                        this.updateOrderStatus(this.selectedOrder.token, 'Completed');
+                        document.getElementById('orderDetails').style.display = 'none';
+                        this.selectedOrder = null;
+                    }
+                });
+                
+                document.getElementById('contactCustomerBtn').addEventListener('click', () => {
+                    if (this.selectedOrder && this.selectedOrder.phone) {
+                        const message = `Hi ${this.selectedOrder.name}, your yRush order (Token: ${this.selectedOrder.token}) is ready for pickup!`;
+                        const whatsappUrl = `https://wa.me/91${this.selectedOrder.phone}?text=${encodeURIComponent(message)}`;
+                        window.open(whatsappUrl, '_blank');
+                    } else {
+                        this.showNotification('📞 No phone number available for this customer');
+                    }
+                });
+                
+                // Storage event fallback
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'yRush_orders') {
+                        console.log('💾 Storage event received');
+                        this.loadOrders();
+                    }
+                });
+            }
+            
+            destroy() {
+                if (this.pollingInterval) {
+                    clearInterval(this.pollingInterval);
+                }
+                if (this.broadcastChannel) {
+                    this.broadcastChannel.close();
+                }
+            }
+        }
 
-    // live updates from checkout/history tabs (BroadcastChannel)
-    try{
-      if(typeof BroadcastChannel!=='undefined'){
-        const ch = new BroadcastChannel('yRush_orders');
-        ch.onmessage = ()=> renderOrders();
-      }
-      // also listen to storage events (another tab)
-      window.addEventListener('storage', (e)=>{ if(e.key===ORDERS_KEY) renderOrders(); });
-    }catch(e){}
-
-    /* ====== PRINT INBOX (merged) ====== */
-    const PI_KEY = 'yrush_print_jobs';
-    const PI_DONE_KEY = 'yrush_print_jobs_done';
-    const piRows = byId('pi_rows');
-
-    function PI_render(){
-      const jobs = load(PI_KEY).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
-      piRows.innerHTML = jobs.map(j=>{
-        const fhtml = (j.files||[]).map((f,idx)=>{
-          const name = f.name || `file-${idx+1}`;
-          return `<a class="btn" download="${name}" href="${f.dataUrl}">⬇️ ${name}</a>`;
-        }).join(' ');
-        const o = j.options||{};
-        const optStr = `
-          Copies: <b>${o.copies||1}</b><br/>
-          Color: <b>${o.color||'BW'}</b>, Sides: <b>${o.sides||'single'}</b><br/>
-          Paper: <b>${o.paper||'A4'}</b><br/>
-          Pages: <b>${o.pages||'-'}</b><br/>
-          Notes: <b>${o.notes||'-'}</b>
-        `;
-        return `<tr>
-          <td><b>${j.id}</b><br/><span class="muted">${fmt(j.createdAt)}</span></td>
-          <td><b>${j.customer?.name||'-'}</b><br/><span class="muted">${j.customer?.phone||''}</span></td>
-          <td>${optStr}</td>
-          <td>${fhtml || '<span class="muted">No files</span>'}</td>
-          <td><span class="tag">${j.status||'Queued'}</span></td>
-          <td>
-            <button class="btn good" onclick="PI_markPrinted('${j.id}')">Printed</button>
-            <button class="btn" onclick="PI_removeJob('${j.id}')">Remove</button>
-          </td>
-        </tr>`;
-      }).join('') || `<tr><td colspan="6" class="muted">No print jobs yet.</td></tr>`;
-    }
-
-    window.PI_markPrinted = function(id){
-      const jobs = load(PI_KEY);
-      const idx = jobs.findIndex(j=>j.id===id);
-      if(idx>=0){
-        const [job] = jobs.splice(idx,1);
-        job.status = 'Printed';
-        const done = load(PI_DONE_KEY);
-        done.push(job);
-        save(PI_DONE_KEY, done);
-        save(PI_KEY, jobs);
-        PI_render();
-      }
-    };
-
-    window.PI_removeJob = function(id){
-      const jobs = load(PI_KEY).filter(j=>j.id!==id);
-      save(PI_KEY, jobs);
-      PI_render();
-    };
-
-    byId('pi_refresh').addEventListener('click', PI_render);
-    byId('pi_clearAll').addEventListener('click', ()=>{
-      if(confirm('Clear ALL pending print jobs?')){ save(PI_KEY, []); PI_render(); }
-    });
-
-    try{
-      if(typeof BroadcastChannel!=='undefined'){
-        const ch = new BroadcastChannel('yRush_print');
-        ch.onmessage = (msg)=>{ if(msg?.data?.type==='PRINT_JOB_NEW'){ PI_render(); } };
-      }
-      window.addEventListener('storage', (e)=>{ if(e.key===PI_KEY) PI_render(); });
-    }catch(e){}
-
-    // initial renders
-    renderOrders();
-    PI_render();
-  </script>
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            const admin = new AdminDashboard();
+            
+            window.addEventListener('beforeunload', () => {
+                admin.destroy();
+            });
+        });
+    </script>
 </body>
 </html>
