@@ -6,40 +6,58 @@
   <title>yRush · Payment</title>
   <link rel="stylesheet" href="assets/app.css">
   <style>
+    :root{--panel:#12151a;--card:#151a21;--text:#e5e7eb;--muted:#9aa4b5;--border:#202734}
     body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--panel);color:var(--text)}
-    .card{background:var(--card);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center;width:320px}
+    .card{background:var(--card);padding:30px;border-radius:16px;box-shadow:var(--shadow);text-align:center;width:340px;border:1px solid var(--border)}
     .btn{margin-top:16px;width:100%}
-    img{width:180px;height:180px;margin:12px auto;border-radius:8px;display:block}
+    img{width:180px;height:180px;margin:12px auto;border-radius:8px;display:block;object-fit:cover;background:#0b0d10}
+    .token{display:inline-block;margin:8px 0 0;padding:8px 12px;border:1px dashed var(--border);border-radius:10px;font-weight:800;letter-spacing:1px}
+    .muted{color:var(--muted);font-size:.9rem}
   </style>
 </head>
 <body>
   <div class="card">
     <h2>UPI Payment</h2>
-    <p>Scan the QR below or click “Simulate Payment Success”.</p>
-    <!-- Replace with your actual QR if you have one -->
-    <img src="assets/upi_qr.png" alt="UPI QR">
+    <p class="muted">Scan the QR or click “Simulate Payment Success”.</p>
 
-    <button class="btn btn-primary" id="successBtn">✅ Simulate Payment Success</button>
+    <div id="tokenWrap" style="margin:8px 0 12px;display:none">
+      <div class="muted">Your order token</div>
+      <div id="token" class="token">— — — — — —</div>
+    </div>
+
+    <!-- Replace with your actual QR -->
+    <img src="images/upi_qr.png" alt="UPI QR">
+
+    <button class="btn btn-primary" id="successBtn">Simulate Payment Success</button>
     <button class="btn btn-ghost" id="cancelBtn">Cancel</button>
   </div>
 
   <script>
     const params = new URLSearchParams(location.search);
-    const token  = params.get('token');
-    const back   = params.get('return') || 'checkout.html';
+    const token  = params.get('token');                    // pre-generated token passed from checkout
+    const back   = params.get('return') || 'checkOut.html';// return target
 
-    // disable success if someone opened this page directly
+    const tokenWrap = document.getElementById('tokenWrap');
+    const tokenEl   = document.getElementById('token');
     const successBtn = document.getElementById('successBtn');
-    if(!token){ successBtn.disabled = true; successBtn.textContent = 'No token found'; }
 
+    // Show token on payment page if present
+    if(token){
+      tokenWrap.style.display = 'block';
+      tokenEl.textContent = token;
+    } else {
+      successBtn.disabled = true;
+      successBtn.textContent = 'No token found';
+    }
+
+    // Success → mark in localStorage then show a dedicated success screen
     successBtn.onclick = ()=>{
-      // Mark this token paid and return to the exact page we came from
       localStorage.setItem('paymentSuccess', token);
-      window.location.replace(back);
+      const url = `PaymentSuccess.html?token=${encodeURIComponent(token)}&return=${encodeURIComponent(back)}`;
+      window.location.replace(url);
     };
 
     document.getElementById('cancelBtn').onclick = ()=>{
-      // Return without marking success
       window.location.replace(back);
     };
   </script>
